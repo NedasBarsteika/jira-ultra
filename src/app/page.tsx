@@ -1,4 +1,7 @@
+import CustomButton from "@/components/utils/buttons/CustomButton";
+import CustomImage from "@/components/utils/images/Image";
 import Image from "next/image";
+import Link from "next/link";
 
 export default function Home() {
   return (
@@ -59,6 +62,13 @@ export default function Home() {
             Documentation
           </a>
         </div>
+        <CustomImage src="/images/art.png" alt="Photo" width={400} height={300} rounded="md" />
+        <Link href="/login">
+          <CustomButton>Login page</CustomButton>
+        </Link>
+        <Link href="/examples">
+          <CustomButton>Examples page</CustomButton>
+        </Link>
       </main>
     </div>
   );
