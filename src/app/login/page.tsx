@@ -1,5 +1,6 @@
-import CustomButton from "@/components/utils/buttons/CustomButton";
-import Link from "next/link";
+import Link from 'next/link';
+
+import CustomButton from '@/components/utils/buttons/CustomButton';
 
 export default function LoginPage() {
   return (

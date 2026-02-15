@@ -1,7 +1,8 @@
-"use client";
+'use client';
 
-import { useState } from "react";
-import CustomButton from "@/components/utils/buttons/CustomButton";
+import { useState } from 'react';
+
+import CustomButton from '@/components/utils/buttons/CustomButton';
 
 export default function ButtonShowcase() {
   const [loadingId, setLoadingId] = useState<string | null>(null);
@@ -47,28 +48,19 @@ export default function ButtonShowcase() {
       <section>
         <h2 className="text-xl font-semibold mb-4">Colors (Solid)</h2>
         <div className="flex flex-wrap gap-3">
-          <CustomButton
-            color="primary"
-            onClick={() => alert("Primary clicked")}
-          >
+          <CustomButton color="primary" onClick={() => alert('Primary clicked')}>
             Primary
           </CustomButton>
-          <CustomButton
-            color="secondary"
-            onClick={() => alert("Secondary clicked")}
-          >
+          <CustomButton color="secondary" onClick={() => alert('Secondary clicked')}>
             Secondary
           </CustomButton>
-          <CustomButton color="danger" onClick={() => alert("Danger clicked")}>
+          <CustomButton color="danger" onClick={() => alert('Danger clicked')}>
             Danger
           </CustomButton>
-          <CustomButton
-            color="success"
-            onClick={() => alert("Success clicked")}
-          >
+          <CustomButton color="success" onClick={() => alert('Success clicked')}>
             Success
           </CustomButton>
-          <CustomButton color="ghost" onClick={() => alert("Ghost clicked")}>
+          <CustomButton color="ghost" onClick={() => alert('Ghost clicked')}>
             Ghost
           </CustomButton>
         </div>
@@ -122,28 +114,26 @@ export default function ButtonShowcase() {
 
       {/* Loading */}
       <section>
-        <h2 className="text-xl font-semibold mb-4">
-          Loading (click to trigger)
-        </h2>
+        <h2 className="text-xl font-semibold mb-4">Loading (click to trigger)</h2>
         <div className="flex flex-wrap gap-3">
           <CustomButton
-            loading={loadingId === "primary"}
-            onClick={() => simulateLoading("primary")}
+            loading={loadingId === 'primary'}
+            onClick={() => simulateLoading('primary')}
           >
             Submit
           </CustomButton>
           <CustomButton
             color="success"
-            loading={loadingId === "success"}
-            onClick={() => simulateLoading("success")}
+            loading={loadingId === 'success'}
+            onClick={() => simulateLoading('success')}
           >
             Save
           </CustomButton>
           <CustomButton
             color="danger"
             variant="outline"
-            loading={loadingId === "danger"}
-            onClick={() => simulateLoading("danger")}
+            loading={loadingId === 'danger'}
+            onClick={() => simulateLoading('danger')}
           >
             Delete
           </CustomButton>
@@ -179,19 +169,14 @@ export default function ButtonShowcase() {
       <section>
         <h2 className="text-xl font-semibold mb-4">onClick Examples</h2>
         <div className="flex flex-wrap gap-3">
-          <CustomButton onClick={() => console.log("Logged to console")}>
-            Console Log
-          </CustomButton>
-          <CustomButton
-            color="success"
-            onClick={() => alert("Form submitted!")}
-          >
+          <CustomButton onClick={() => console.log('Logged to console')}>Console Log</CustomButton>
+          <CustomButton color="success" onClick={() => alert('Form submitted!')}>
             Submit Form
           </CustomButton>
           <CustomButton
             color="danger"
             onClick={() => {
-              if (confirm("Are you sure?")) alert("Deleted!");
+              if (confirm('Are you sure?')) alert('Deleted!');
             }}
           >
             Delete Item

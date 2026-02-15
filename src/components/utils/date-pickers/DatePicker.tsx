@@ -1,9 +1,10 @@
-"use client";
+'use client';
 
-import { useEffect, useId, useRef, useState } from "react";
-import { DAYS_SHORT, MONTHS_FULL } from "@/config/constants";
+import { useEffect, useId, useRef, useState } from 'react';
 
-type DatePickerSize = "sm" | "md" | "lg";
+import { DAYS_SHORT, MONTHS_FULL } from '@/config/constants';
+
+type DatePickerSize = 'sm' | 'md' | 'lg';
 
 interface DatePickerProps {
   value?: Date | null;
@@ -18,15 +19,15 @@ interface DatePickerProps {
 }
 
 const sizeStyles: Record<DatePickerSize, string> = {
-  sm: "ps-9 pe-3 py-1.5 text-sm",
-  md: "ps-9 pe-3 py-2.5 text-sm",
-  lg: "ps-10 pe-4 py-3 text-base",
+  sm: 'ps-9 pe-3 py-1.5 text-sm',
+  md: 'ps-9 pe-3 py-2.5 text-sm',
+  lg: 'ps-10 pe-4 py-3 text-base',
 };
 
 const iconSizes: Record<DatePickerSize, string> = {
-  sm: "w-3.5 h-3.5",
-  md: "w-4 h-4",
-  lg: "w-5 h-5",
+  sm: 'w-3.5 h-3.5',
+  md: 'w-4 h-4',
+  lg: 'w-5 h-5',
 };
 
 function getDaysInMonth(year: number, month: number) {
@@ -39,8 +40,8 @@ function getFirstDayOfMonth(year: number, month: number) {
 
 function formatDisplay(date: Date) {
   const y = date.getFullYear();
-  const m = String(date.getMonth() + 1).padStart(2, "0");
-  const d = String(date.getDate()).padStart(2, "0");
+  const m = String(date.getMonth() + 1).padStart(2, '0');
+  const d = String(date.getDate()).padStart(2, '0');
   return `${y}-${m}-${d}`;
 }
 
@@ -56,9 +57,9 @@ export default function DatePicker({
   value = null,
   onChange,
   label,
-  placeholder = "Select date",
+  placeholder = 'Select date',
   error,
-  size = "md",
+  size = 'md',
   clearable = true,
   disabled = false,
   fullWidth = false,
@@ -85,19 +86,19 @@ export default function DatePicker({
         setOpen(false);
       }
     }
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
   function prevMonth() {
-    setView((v) => {
+    setView(v => {
       if (v.month === 0) return { year: v.year - 1, month: 11 };
       return { year: v.year, month: v.month - 1 };
     });
   }
 
   function nextMonth() {
-    setView((v) => {
+    setView(v => {
       if (v.month === 11) return { year: v.year + 1, month: 0 };
       return { year: v.year, month: v.month + 1 };
     });
@@ -129,7 +130,12 @@ export default function DatePicker({
 
   // Previous month trailing days
   for (let i = firstDay - 1; i >= 0; i--) {
-    cells.push({ day: daysInPrevMonth - i, month: prevMonthIndex, year: prevMonthYear, current: false });
+    cells.push({
+      day: daysInPrevMonth - i,
+      month: prevMonthIndex,
+      year: prevMonthYear,
+      current: false,
+    });
   }
   // Current month days
   for (let d = 1; d <= daysInMonth; d++) {
@@ -142,19 +148,23 @@ export default function DatePicker({
   }
 
   const inputClasses = [
-    "block w-full rounded-lg border bg-gray-50 text-gray-900 shadow-sm transition-colors duration-150 select-none",
-    "focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500",
-    "dark:bg-gray-700 dark:text-white dark:border-gray-600 dark:placeholder-gray-400",
-    error ? "border-red-500 focus:ring-red-500" : "border-gray-300 hover:border-gray-400 dark:border-gray-600",
+    'block w-full rounded-lg border bg-gray-50 text-gray-900 shadow-sm transition-colors duration-150 select-none',
+    'focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500',
+    'dark:bg-gray-700 dark:text-white dark:border-gray-600 dark:placeholder-gray-400',
+    error
+      ? 'border-red-500 focus:ring-red-500'
+      : 'border-gray-300 hover:border-gray-400 dark:border-gray-600',
     sizeStyles[size],
-    disabled ? "opacity-50 cursor-not-allowed bg-gray-100" : "cursor-pointer",
-    clearable && value ? "pe-9" : "",
-  ].filter(Boolean).join(" ");
+    disabled ? 'opacity-50 cursor-not-allowed bg-gray-100' : 'cursor-pointer',
+    clearable && value ? 'pe-9' : '',
+  ]
+    .filter(Boolean)
+    .join(' ');
 
   return (
     <div
       ref={containerRef}
-      className={`relative inline-flex flex-col gap-1 ${fullWidth ? "w-full" : "max-w-sm w-full"}`}
+      className={`relative inline-flex flex-col gap-1 ${fullWidth ? 'w-full' : 'max-w-sm w-full'}`}
     >
       {label && (
         <label
@@ -194,7 +204,7 @@ export default function DatePicker({
           aria-haspopup="dialog"
           aria-expanded={open}
         >
-            {value ? (
+          {value ? (
             <span>{formatDisplay(value)}</span>
           ) : (
             <span className="text-gray-400 dark:text-gray-500">{placeholder}</span>
@@ -231,7 +241,13 @@ export default function DatePicker({
               className="rounded-lg p-1.5 text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700 cursor-pointer"
               aria-label="Previous month"
             >
-              <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <svg
+                className="h-5 w-5"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                strokeWidth={2}
+              >
                 <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
               </svg>
             </button>
@@ -244,7 +260,13 @@ export default function DatePicker({
               className="rounded-lg p-1.5 text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700 cursor-pointer"
               aria-label="Next month"
             >
-              <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <svg
+                className="h-5 w-5"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                strokeWidth={2}
+              >
                 <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
               </svg>
             </button>
@@ -252,8 +274,10 @@ export default function DatePicker({
 
           {/* Day headers */}
           <div className="mb-1 grid grid-cols-7 text-center text-xs font-medium text-gray-500 dark:text-gray-400">
-            {DAYS_SHORT.map((d) => (
-              <div key={d} className="py-1.5">{d}</div>
+            {DAYS_SHORT.map(d => (
+              <div key={d} className="py-1.5">
+                {d}
+              </div>
             ))}
           </div>
 
@@ -270,15 +294,15 @@ export default function DatePicker({
                   type="button"
                   onClick={() => selectDate(cell.year, cell.month, cell.day)}
                   className={[
-                    "mx-auto flex h-8 w-8 items-center justify-center rounded-lg transition-colors cursor-pointer",
+                    'mx-auto flex h-8 w-8 items-center justify-center rounded-lg transition-colors cursor-pointer',
                     isSelected
-                      ? "bg-blue-600 text-white font-semibold"
+                      ? 'bg-blue-600 text-white font-semibold'
                       : isToday
-                        ? "bg-blue-100 text-blue-700 font-semibold dark:bg-blue-900 dark:text-blue-300"
+                        ? 'bg-blue-100 text-blue-700 font-semibold dark:bg-blue-900 dark:text-blue-300'
                         : cell.current
-                          ? "text-gray-900 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-700"
-                          : "text-gray-400 hover:bg-gray-100 dark:text-gray-500 dark:hover:bg-gray-700",
-                  ].join(" ")}
+                          ? 'text-gray-900 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-700'
+                          : 'text-gray-400 hover:bg-gray-100 dark:text-gray-500 dark:hover:bg-gray-700',
+                  ].join(' ')}
                 >
                   {cell.day}
                 </button>

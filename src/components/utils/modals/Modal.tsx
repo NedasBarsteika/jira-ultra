@@ -1,10 +1,11 @@
-"use client";
+'use client';
 
-import { useEffect, useRef, type ReactNode } from "react";
-import { createPortal } from "react-dom";
-import CustomButton from "@/components/utils/buttons/CustomButton";
+import { useEffect, useRef, type ReactNode } from 'react';
+import { createPortal } from 'react-dom';
 
-type ModalSize = "sm" | "md" | "lg";
+import CustomButton from '@/components/utils/buttons/CustomButton';
+
+type ModalSize = 'sm' | 'md' | 'lg';
 
 interface ModalProps {
   open: boolean;
@@ -21,9 +22,9 @@ interface ModalProps {
 }
 
 const sizeStyles: Record<ModalSize, string> = {
-  sm: "max-w-sm",
-  md: "max-w-lg",
-  lg: "max-w-2xl",
+  sm: 'max-w-sm',
+  md: 'max-w-lg',
+  lg: 'max-w-2xl',
 };
 
 export default function Modal({
@@ -31,12 +32,12 @@ export default function Modal({
   onClose,
   title,
   children,
-  size = "md",
+  size = 'md',
   submitLabel,
   onSubmit,
   submitDisabled = false,
   submitLoading = false,
-  cancelLabel = "Cancel",
+  cancelLabel = 'Cancel',
 }: ModalProps) {
   const panelRef = useRef<HTMLDivElement>(null);
 
@@ -44,17 +45,17 @@ export default function Modal({
   useEffect(() => {
     if (!open) return;
     function handleKey(e: KeyboardEvent) {
-      if (e.key === "Escape") onClose();
+      if (e.key === 'Escape') onClose();
     }
-    document.addEventListener("keydown", handleKey);
-    return () => document.removeEventListener("keydown", handleKey);
+    document.addEventListener('keydown', handleKey);
+    return () => document.removeEventListener('keydown', handleKey);
   }, [open, onClose]);
 
   // Lock body scroll while open
   useEffect(() => {
     if (!open) return;
     const prev = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
+    document.body.style.overflow = 'hidden';
     return () => {
       document.body.style.overflow = prev;
     };
@@ -81,9 +82,7 @@ export default function Modal({
       >
         {/* Header */}
         <div className="flex items-center justify-between border-b border-gray-200 px-6 py-4 dark:border-gray-700">
-          <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
-            {title}
-          </h2>
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-white">{title}</h2>
           <button
             type="button"
             onClick={onClose}
@@ -97,11 +96,7 @@ export default function Modal({
               stroke="currentColor"
               strokeWidth={2}
             >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M6 18L18 6M6 6l12 12"
-              />
+              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
             </svg>
           </button>
         </div>

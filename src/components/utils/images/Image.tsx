@@ -1,9 +1,9 @@
-import NextImage, { type ImageProps as NextImageProps } from "next/image";
+import NextImage, { type ImageProps as NextImageProps } from 'next/image';
 
-type ImageFit = "contain" | "cover" | "fill" | "none";
-type ImageRounded = "none" | "sm" | "md" | "lg" | "full";
+type ImageFit = 'contain' | 'cover' | 'fill' | 'none';
+type ImageRounded = 'none' | 'sm' | 'md' | 'lg' | 'full';
 
-interface CustomImageProps extends Omit<NextImageProps, "objectFit"> {
+interface CustomImageProps extends Omit<NextImageProps, 'objectFit'> {
   fit?: ImageFit;
   rounded?: ImageRounded;
   aspectRatio?: string;
@@ -11,30 +11,28 @@ interface CustomImageProps extends Omit<NextImageProps, "objectFit"> {
 }
 
 const fitStyles: Record<ImageFit, string> = {
-  contain: "object-contain",
-  cover: "object-cover",
-  fill: "object-fill",
-  none: "object-none",
+  contain: 'object-contain',
+  cover: 'object-cover',
+  fill: 'object-fill',
+  none: 'object-none',
 };
 
 const roundedStyles: Record<ImageRounded, string> = {
-  none: "rounded-none",
-  sm: "rounded-sm",
-  md: "rounded-md",
-  lg: "rounded-lg",
-  full: "rounded-full",
+  none: 'rounded-none',
+  sm: 'rounded-sm',
+  md: 'rounded-md',
+  lg: 'rounded-lg',
+  full: 'rounded-full',
 };
 
 export default function CustomImage({
-  fit = "cover",
-  rounded = "none",
+  fit = 'cover',
+  rounded = 'none',
   aspectRatio,
-  className = "",
+  className = '',
   ...rest
 }: CustomImageProps) {
-  const classes = [fitStyles[fit], roundedStyles[rounded], className]
-    .filter(Boolean)
-    .join(" ");
+  const classes = [fitStyles[fit], roundedStyles[rounded], className].filter(Boolean).join(' ');
 
   if (aspectRatio) {
     return (

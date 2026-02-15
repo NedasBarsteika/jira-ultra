@@ -1,24 +1,17 @@
-"use client";
+'use client';
 
-import CustomImage from "@/components/utils/images/Image";
+import CustomImage from '@/components/utils/images/Image';
 
 export default function ImageShowcase() {
   return (
     <div className="flex flex-col gap-10">
       {/* Basic Usage */}
       <section>
-        <h2 className="text-xl font-semibold mb-4 text-black dark:text-white">
-          Basic Usage
-        </h2>
+        <h2 className="text-xl font-semibold mb-4 text-black dark:text-white">Basic Usage</h2>
         <div className="flex flex-wrap items-end gap-4">
           <div>
             <p className="text-sm text-zinc-500 mb-2">Default (cover)</p>
-            <CustomImage
-              src="/images/art.png"
-              alt="Art sample"
-              width={200}
-              height={150}
-            />
+            <CustomImage src="/images/art.png" alt="Art sample" width={200} height={150} />
           </div>
           <div>
             <p className="text-sm text-zinc-500 mb-2">Contain</p>
@@ -46,9 +39,7 @@ export default function ImageShowcase() {
 
       {/* Rounded Variants */}
       <section>
-        <h2 className="text-xl font-semibold mb-4 text-black dark:text-white">
-          Rounded Variants
-        </h2>
+        <h2 className="text-xl font-semibold mb-4 text-black dark:text-white">Rounded Variants</h2>
         <div className="flex flex-wrap items-end gap-4">
           <div>
             <p className="text-sm text-zinc-500 mb-2">none</p>
@@ -112,34 +103,19 @@ export default function ImageShowcase() {
           <div>
             <p className="text-sm text-zinc-500 mb-2">16 / 9</p>
             <div className="max-w-md">
-              <CustomImage
-                src="/images/art.png"
-                alt="16:9 art"
-                aspectRatio="16/9"
-                rounded="md"
-              />
+              <CustomImage src="/images/art.png" alt="16:9 art" aspectRatio="16/9" rounded="md" />
             </div>
           </div>
           <div>
             <p className="text-sm text-zinc-500 mb-2">4 / 3</p>
             <div className="max-w-sm">
-              <CustomImage
-                src="/images/art.png"
-                alt="4:3 art"
-                aspectRatio="4/3"
-                rounded="md"
-              />
+              <CustomImage src="/images/art.png" alt="4:3 art" aspectRatio="4/3" rounded="md" />
             </div>
           </div>
           <div>
             <p className="text-sm text-zinc-500 mb-2">1 / 1 (square)</p>
             <div className="max-w-[200px]">
-              <CustomImage
-                src="/images/art.png"
-                alt="Square art"
-                aspectRatio="1/1"
-                rounded="lg"
-              />
+              <CustomImage src="/images/art.png" alt="Square art" aspectRatio="1/1" rounded="lg" />
             </div>
           </div>
         </div>
@@ -147,9 +123,7 @@ export default function ImageShowcase() {
 
       {/* Avatar-style */}
       <section>
-        <h2 className="text-xl font-semibold mb-4 text-black dark:text-white">
-          Avatar Sizes
-        </h2>
+        <h2 className="text-xl font-semibold mb-4 text-black dark:text-white">Avatar Sizes</h2>
         <div className="flex flex-wrap items-center gap-4">
           <div className="text-center">
             <CustomImage
