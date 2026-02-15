@@ -1,8 +1,9 @@
-"use client";
+'use client';
 
-import { useState } from "react";
-import * as yup from "yup";
-import Modal from "@/components/utils/modals/Modal";
+import { useState } from 'react';
+import * as yup from 'yup';
+
+import Modal from '@/components/utils/modals/Modal';
 
 interface CreateTaskModalProps {
   open: boolean;
@@ -21,55 +22,44 @@ const taskSchema = yup.object({
   title: yup
     .string()
     .trim()
-    .required("Title is required")
-    .min(3, "Title must be at least 3 characters")
-    .max(100, "Title must be at most 100 characters"),
-  description: yup
-    .string()
-    .trim()
-    .max(500, "Description must be at most 500 characters"),
+    .required('Title is required')
+    .min(3, 'Title must be at least 3 characters')
+    .max(100, 'Title must be at most 100 characters'),
+  description: yup.string().trim().max(500, 'Description must be at most 500 characters'),
   priority: yup
     .string()
-    .oneOf(["low", "medium", "high", "critical"], "Invalid priority")
-    .required("Priority is required"),
-  assignee: yup
-    .string()
-    .trim()
-    .max(50, "Assignee must be at most 50 characters"),
+    .oneOf(['low', 'medium', 'high', 'critical'], 'Invalid priority')
+    .required('Priority is required'),
+  assignee: yup.string().trim().max(50, 'Assignee must be at most 50 characters'),
 });
 
 type FieldErrors = Partial<Record<keyof TaskFormData, string>>;
 
 const inputClasses =
-  "block w-full rounded-lg border border-gray-300 bg-gray-50 px-3 py-2.5 text-sm text-gray-900 shadow-sm transition-colors placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white dark:border-gray-600 dark:placeholder-gray-400";
+  'block w-full rounded-lg border border-gray-300 bg-gray-50 px-3 py-2.5 text-sm text-gray-900 shadow-sm transition-colors placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white dark:border-gray-600 dark:placeholder-gray-400';
 
 const inputErrorClasses =
-  "block w-full rounded-lg border border-red-500 bg-gray-50 px-3 py-2.5 text-sm text-gray-900 shadow-sm transition-colors placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 dark:bg-gray-700 dark:text-white dark:border-red-500 dark:placeholder-gray-400";
+  'block w-full rounded-lg border border-red-500 bg-gray-50 px-3 py-2.5 text-sm text-gray-900 shadow-sm transition-colors placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 dark:bg-gray-700 dark:text-white dark:border-red-500 dark:placeholder-gray-400';
 
-const labelClasses =
-  "block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1";
+const labelClasses = 'block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1';
 
 const emptyForm: TaskFormData = {
-  title: "",
-  description: "",
-  priority: "medium",
-  assignee: "",
+  title: '',
+  description: '',
+  priority: 'medium',
+  assignee: '',
 };
 
-export default function CreateTaskModal({
-  open,
-  onClose,
-  onSubmit,
-}: CreateTaskModalProps) {
+export default function CreateTaskModal({ open, onClose, onSubmit }: CreateTaskModalProps) {
   const [form, setForm] = useState<TaskFormData>(emptyForm);
   const [errors, setErrors] = useState<FieldErrors>({});
   const [loading, setLoading] = useState(false);
 
   function update(field: keyof TaskFormData, value: string) {
-    setForm((prev) => ({ ...prev, [field]: value }));
+    setForm(prev => ({ ...prev, [field]: value }));
     // Clear field error on change
     if (errors[field]) {
-      setErrors((prev) => {
+      setErrors(prev => {
         const next = { ...prev };
         delete next[field];
         return next;
@@ -114,7 +104,9 @@ export default function CreateTaskModal({
       onClose={handleClose}
       title="Create Task"
       submitLabel="Create"
-      onSubmit={handleSubmit}
+      onSubmit={() => {
+        void handleSubmit();
+      }}
       submitLoading={loading}
     >
       <div className="flex flex-col gap-4">
@@ -128,12 +120,10 @@ export default function CreateTaskModal({
             className={errors.title ? inputErrorClasses : inputClasses}
             placeholder="Enter task title"
             value={form.title}
-            onChange={(e) => update("title", e.target.value)}
+            onChange={e => update('title', e.target.value)}
           />
           {errors.title && (
-            <p className="mt-1 text-sm text-red-600 dark:text-red-400">
-              {errors.title}
-            </p>
+            <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.title}</p>
           )}
         </div>
 
@@ -145,12 +135,10 @@ export default function CreateTaskModal({
             rows={3}
             placeholder="Describe the task..."
             value={form.description}
-            onChange={(e) => update("description", e.target.value)}
+            onChange={e => update('description', e.target.value)}
           />
           {errors.description && (
-            <p className="mt-1 text-sm text-red-600 dark:text-red-400">
-              {errors.description}
-            </p>
+            <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.description}</p>
           )}
         </div>
 
@@ -160,7 +148,7 @@ export default function CreateTaskModal({
           <select
             className={`${errors.priority ? inputErrorClasses : inputClasses} cursor-pointer`}
             value={form.priority}
-            onChange={(e) => update("priority", e.target.value)}
+            onChange={e => update('priority', e.target.value)}
           >
             <option value="low">Low</option>
             <option value="medium">Medium</option>
@@ -168,9 +156,7 @@ export default function CreateTaskModal({
             <option value="critical">Critical</option>
           </select>
           {errors.priority && (
-            <p className="mt-1 text-sm text-red-600 dark:text-red-400">
-              {errors.priority}
-            </p>
+            <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.priority}</p>
           )}
         </div>
 
@@ -182,12 +168,10 @@ export default function CreateTaskModal({
             className={errors.assignee ? inputErrorClasses : inputClasses}
             placeholder="Assign to..."
             value={form.assignee}
-            onChange={(e) => update("assignee", e.target.value)}
+            onChange={e => update('assignee', e.target.value)}
           />
           {errors.assignee && (
-            <p className="mt-1 text-sm text-red-600 dark:text-red-400">
-              {errors.assignee}
-            </p>
+            <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.assignee}</p>
           )}
         </div>
       </div>

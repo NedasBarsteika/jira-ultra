@@ -1,5 +1,5 @@
 // Custom hooks
-import { useEffect, useState } from "react";
+import { useEffect, useState } from 'react';
 
 /**
  * Debounces a value by the given delay.
