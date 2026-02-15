@@ -1,32 +1,31 @@
 ## Getting Started
 
 Install project dependencies:
-npm install
+- npm install
 
 Run the development server:
-npm run dev
+- npm run dev
 
 Run these commands for linter (DONE BEFORE EVERY COMMIT):
-npm run lint
-npm run lint:fix 
+- npm run lint
+- npm run lint:fix 
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
 
 
 ## Docker
-docker compse up -d
-docker compose down -v
+Start container:
+- docker compse up -d
+Stop container:
+- docker compose down -v
 
-To connect to db from dbeaver:
-Host: localhost
-Database: jira-ultra-db
-Port: 5555
-Username: root
-Password: postgres
-
-![alt text](image.png)
-
+To connect to db from dbeaver (see KS-9 task in jira for picture):
+- Host: localhost
+- Database: jira-ultra-db
+- Port: 5555
+- Username: root
+- Password: postgres
 
 
 ## Environment
