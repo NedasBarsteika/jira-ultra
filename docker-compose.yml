@@ -1,0 +1,16 @@
+services:
+  postgres:
+    image: postgres:18
+    container_name: jira-ultra-postgres
+    restart: always
+    environment:
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: jira-ultra-db
+    ports:
+      - "5555:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql
+
+volumes:
+  postgres_data:
