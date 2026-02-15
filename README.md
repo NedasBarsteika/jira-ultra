@@ -17,6 +17,7 @@ Open [http://localhost:3000](http://localhost:3000) with your browser to see the
 ## Docker
 Start container:
 - docker compse up -d
+
 Stop container:
 - docker compose down -v
 
