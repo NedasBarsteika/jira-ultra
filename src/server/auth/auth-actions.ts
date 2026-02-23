@@ -1,34 +1,76 @@
 'use server';
 
 import { headers } from 'next/headers';
+import { ZodError } from 'zod';
 
 import { auth } from '@/lib/better-auth/auth';
+import { signInSchema, signUpSchema } from '@/lib/validation/auth';
 
-export async function signUpAction(email: string, password: string, name: string) {
-  const result = await auth.api.signUpEmail({
-    body: {
-      email,
-      name,
-      password,
-      callbackURL: '/',
-    },
-    headers: await headers(),
-  });
+export async function signUpAction(formData: FormData) {
+  try {
+    const rawData = {
+      confirmPassword: formData.get('confirmPassword'),
+      email: formData.get('email'),
+      name: formData.get('name'),
+      password: formData.get('password'),
+    };
+    const validatedData = signUpSchema.parse(rawData);
 
-  return result;
+    const { email, name, password } = validatedData;
+
+    await auth.api.signUpEmail({
+      body: {
+        email,
+        name,
+        password,
+      },
+    });
+    return { success: true };
+  } catch (error) {
+    if (error instanceof ZodError) {
+      return {
+        fieldErrors: error.flatten().fieldErrors,
+        success: false,
+      };
+    }
+
+    return {
+      serverError: error instanceof Error ? error.message : 'An unexpected error occurred',
+      success: false,
+    };
+  }
 }
 
-export async function signInAction(email: string, password: string) {
-  const result = await auth.api.signInEmail({
-    body: {
-      email,
-      password,
-      callbackURL: '/',
-    },
-    headers: await headers(),
-  });
+export async function signInAction(formData: FormData) {
+  try {
+    const rawData = {
+      email: formData.get('email'),
+      password: formData.get('password'),
+    };
+    const validatedData = signInSchema.parse(rawData);
 
-  return result;
+    const { email, password } = validatedData;
+
+    await auth.api.signInEmail({
+      body: {
+        email,
+        password,
+      },
+    });
+    return { success: true };
+  } catch (error) {
+    if (error instanceof ZodError) {
+      return {
+        fieldErrors: error.flatten().fieldErrors,
+        success: false,
+      };
+    }
+
+    return {
+      serverError: 'Invalid email or password',
+      success: false,
+    };
+  }
 }
 
 export async function signOutAction() {

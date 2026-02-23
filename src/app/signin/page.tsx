@@ -1,110 +1,242 @@
 'use client';
-import { Mail, Lock } from 'lucide-react';
-import { useRouter } from 'next/navigation';
+import GitHubIcon from '@mui/icons-material/GitHub';
+import GoogleIcon from '@mui/icons-material/Google';
+import InputAdornment from '@mui/material/InputAdornment';
+import { Mail, Lock, ArrowRight } from 'lucide-react';
+import { redirect } from 'next/navigation';
 import { useState } from 'react';
+import { RiErrorWarningFill } from 'react-icons/ri';
+import { treeifyError } from 'zod';
 
+import CustomButton from '@/components/utils/buttons/CustomButton';
+import { Checkbox } from '@/components/utils/CheckBox';
+import { Input } from '@/components/utils/inputs/input';
+import { Label } from '@/components/utils/Label';
+import { signInSchema } from '@/lib/validation/auth';
 import { signInAction } from '@/server/auth/auth-actions';
 
-interface SigninFormData {
-  email: string;
-  password: string;
+interface FieldErrors {
+  email?:
+    | {
+        errors: string[];
+      }
+    | undefined;
+  password?:
+    | {
+        errors: string[];
+      }
+    | undefined;
 }
 
-export default function SigninClient() {
-  const router = useRouter();
-  const [formData, setFormData] = useState<SigninFormData>({
-    email: '',
-    password: '',
-  });
-  const [error, setError] = useState<string | null>(null);
+export default function SignIn() {
+  const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
+  const [serverError, setServerError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-
-  function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
-  }
 
   async function handleSubmit(e: React.SubmitEvent<HTMLFormElement>) {
     e.preventDefault();
-    setError(null);
 
+    setFieldErrors({});
+    setServerError(null);
     setIsLoading(true);
-    try {
-      await signInAction(formData.email, formData.password);
-    } catch (err) {
-      setError('Something went wrong. Please try again.');
-      console.error(err);
-    } finally {
+
+    const formData = new FormData(e.currentTarget);
+
+    const values = {
+      email: formData.get('email'),
+      password: formData.get('password'),
+    };
+
+    const result = signInSchema.safeParse(values);
+
+    if (!result.success) {
+      setFieldErrors(treeifyError(result.error).properties ?? {});
       setIsLoading(false);
-      router.push('/');
+      return;
     }
+
+    const response = await signInAction(formData);
+
+    if (!response.success) {
+      if (response.fieldErrors) {
+        setFieldErrors(response.fieldErrors);
+      }
+
+      if (response.serverError) {
+        setServerError(response.serverError);
+      }
+      setIsLoading(false);
+      return;
+    }
+
+    setIsLoading(false);
+    redirect('/');
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-[#2f2b47] px-4">
-      <div className="w-full max-w-md rounded-2xl bg-[#1f1b36] p-8 shadow-xl">
-        {/* Header */}
-        <div className="mb-8 text-center">
-          <h1 className="text-3xl font-bold text-white">{'SIGN IN'}</h1>
+    <div className="min-h-screen w-full flex items-center justify-center bg-background p-4">
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        {/* Gradient orbs for visual interest */}
+        <div className="absolute top-1/4 -left-1/4 w-96 h-96 bg-[#8b7cf7]/10 rounded-full blur-[120px]" />
+        <div className="absolute bottom-1/4 -right-1/4 w-96 h-96 bg-[#60a5fa]/10 rounded-full blur-[120px]" />
+      </div>
+
+      <div className="w-full max-w-md space-y-8 relative z-10">
+        {/* Logo */}
+        <div className="flex flex-col items-center space-y-3">
+          <div className="relative">
+            {/* Subtle glow behind logo */}
+            <div className="absolute inset-0 bg-linear-to-br from-[#8b7cf7]/15 to-[#60a5fa]/15 blur-3xl rounded-full scale-150" />
+            {/* <img src={logoImg} alt="Iterova" className="relative h-16 w-16 object-contain" /> */}
+          </div>
+          <div className="text-center">
+            <h1 className="text-2xl">Welcome back</h1>
+            <p className="text-sm text-muted-foreground mt-1">
+              Sign in to your account to continue
+            </p>
+          </div>
         </div>
 
-        {/* Form */}
-        <form
-          className="space-y-5"
-          onSubmit={e => {
-            void handleSubmit(e);
-          }}
-        >
-          <div>
-            <label htmlFor="email" className="mb-1 block text-sm text-gray-300">
-              {'Email'}
-            </label>
-            <div className="relative">
-              <Mail className="absolute top-1/2 left-3 -translate-y-1/2 text-gray-400" size={18} />
-              <input
-                id="email"
+        {/* Sign in form */}
+        <div className="bg-card border border-border rounded-xl p-8 shadow-xl">
+          <form
+            className="space-y-5"
+            onSubmit={e => {
+              void handleSubmit(e);
+            }}
+          >
+            {/* Email */}
+            <div className="space-y-2">
+              <Label>Email address</Label>
+              <Input
                 name="email"
-                type="email"
                 placeholder="you@example.com"
-                value={formData.email}
-                onChange={handleChange}
-                className="w-full rounded-lg bg-[#2a2545] py-2 pr-4 pl-10 text-white placeholder-gray-500 focus:ring-2 focus:ring-red-500 focus:outline-none"
+                startAdornment={
+                  <InputAdornment position="start" sx={{ color: 'var(--muted-foreground)' }}>
+                    <Mail size={16} />
+                  </InputAdornment>
+                }
               />
-            </div>{' '}
-          </div>
+              {fieldErrors.email && (
+                <>
+                  <div className="flex items-center gap-1 pt-1">
+                    <RiErrorWarningFill className="h-5 w-5 text-red-500" />
 
-          <div>
-            <label className="mb-1 block text-sm text-gray-300">{'Password'}</label>
-            <div className="relative">
-              <Lock className="absolute top-1/2 left-3 -translate-y-1/2 text-gray-400" size={18} />
-              <input
-                name="password"
-                type="password"
-                placeholder="••••••••"
-                value={formData.password}
-                onChange={handleChange}
-                className="w-full rounded-lg bg-[#2a2545] py-2 pr-4 pl-10 text-white placeholder-gray-500 focus:ring-2 focus:ring-red-500 focus:outline-none"
+                    <p className="text-sm text-red-500">{fieldErrors.email.errors[0]}</p>
+                  </div>
+                </>
+              )}
+            </div>
+
+            {/* Password */}
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <Label>Password</Label>
+                <button
+                  type="button"
+                  className="text-xs text-[#8b7cf7] hover:text-[#a78bfa] transition-colors"
+                >
+                  Forgot password?
+                </button>
+              </div>
+              <div className="relative">
+                <Input
+                  name="password"
+                  type="password"
+                  placeholder="Enter your password"
+                  className="pl-10"
+                  startAdornment={
+                    <InputAdornment position="start" sx={{ color: 'var(--muted-foreground)' }}>
+                      <Lock size={16} />
+                    </InputAdornment>
+                  }
+                />
+              </div>
+              {fieldErrors.password && (
+                <>
+                  <div className="flex items-center gap-1 pt-1">
+                    <RiErrorWarningFill className="h-5 w-5 text-red-500" />
+
+                    <p className="text-sm text-red-500">{fieldErrors.password.errors[0]}</p>
+                  </div>
+                </>
+              )}
+            </div>
+
+            {/* Remember me */}
+            <div className="flex items-center space-x-2">
+              <Label className="text-sm text-muted-foreground cursor-pointer">
+                {'Remember me'}
+              </Label>
+              <Checkbox
+                id="remember"
+                // checked={rememberMe}
+                // onChange={e => setRememberMe(e.target.checked)}
               />
+            </div>
+
+            {serverError && (
+              <>
+                <div className="flex items-center gap-1">
+                  <RiErrorWarningFill className="h-5 w-5 text-red-500" />
+
+                  <p className="text-sm text-red-500">{serverError}</p>
+                </div>
+              </>
+            )}
+
+            {/* Submit button */}
+            <CustomButton
+              type="submit"
+              disabled={isLoading}
+              loading={isLoading}
+              className="w-full"
+              size="lg"
+            >
+              {isLoading ? 'Signing in...' : 'Sign In'}
+              <ArrowRight className="size-4 ml-2" />
+            </CustomButton>
+          </form>
+
+          {/* Divider */}
+          <div className="relative my-6">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-border" />
+            </div>
+            <div className="relative flex justify-center text-xs">
+              <span className="bg-card px-3 text-muted-foreground">Or continue with</span>
             </div>
           </div>
 
-          {error && <p className="text-sm text-red-400">{error}</p>}
+          {/* Social login buttons */}
+          <div className="grid grid-cols-2 gap-3">
+            <CustomButton color="transparent" type="button" className="w-full">
+              <GoogleIcon />
+              Google
+            </CustomButton>
+            <CustomButton color="transparent" type="button" className="w-full">
+              <GitHubIcon />
+              GitHub
+            </CustomButton>
+          </div>
+        </div>
 
-          <button
-            type="submit"
-            disabled={isLoading}
-            className="w-full cursor-pointer rounded-lg bg-red-600 py-2.5 font-semibold text-white transition hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-60"
-          >
-            {isLoading ? 'Signing in...' : 'Sign In'}
+        {/* Sign up link */}
+        <p className="text-center text-sm text-muted-foreground">
+          {"Don't have an account? "}
+          <button className="text-[#8b7cf7] hover:text-[#a78bfa] transition-colors">
+            Sign up for free
           </button>
-        </form>
+        </p>
 
         {/* Footer */}
-        <p className="mt-6 text-center text-sm text-gray-400">
-          {'Do not have an account? '}
-          <a href="/signup" className="text-red-500 hover:underline">
-            {'Sign up'}
-          </a>
+        <p className="text-center text-xs text-muted-foreground/60">
+          By signing in, you agree to our{' '}
+          <button className="hover:text-muted-foreground transition-colors">
+            Terms of Service
+          </button>{' '}
+          and{' '}
+          <button className="hover:text-muted-foreground transition-colors">Privacy Policy</button>
         </p>
       </div>
     </div>
