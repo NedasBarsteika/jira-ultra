@@ -1,185 +1,193 @@
--- Jira Ultra Database Schema
+-- Iterova Database Schema
 -- PostgreSQL 18
 
--- Enable UUID extension
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+
+CREATE TYPE subscription_tier AS ENUM ('free', 'pro', 'enterprise');
+CREATE TYPE user_role AS ENUM ('member', 'leader', 'viewer');
+CREATE TYPE team_role AS ENUM ('admin', 'member', 'viewer');
+CREATE TYPE sprint_status AS ENUM ('planned', 'active', 'completed', 'closed');
+CREATE TYPE task_status AS ENUM ('to_do', 'in_progress', 'review', 'test', 'done');
+CREATE TYPE task_priority AS ENUM ('critical', 'high', 'medium', 'low');
+CREATE TYPE task_type AS ENUM ('epic', 'story', 'task', 'bug', 'spike');
+CREATE TYPE poker_session_status AS ENUM ('voting', 'revealed', 'completed');
+CREATE TYPE availability_status AS ENUM ('pending', 'approved', 'rejected');
+
+
+-- ORGANIZATION table
+CREATE TABLE organization (
+    organization_id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    name VARCHAR(255) NOT NULL,
+    subscription_tier subscription_tier NOT NULL DEFAULT 'free'
+);
 
 -- USER table
 CREATE TABLE "user" (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    user_id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    organization_id UUID NOT NULL REFERENCES organization(organization_id) ON DELETE CASCADE,
+    full_name VARCHAR(255) NOT NULL,
     email VARCHAR(255) UNIQUE NOT NULL,
-    username VARCHAR(100) UNIQUE NOT NULL,
-    password_hash VARCHAR(255) NOT NULL,
-    full_name VARCHAR(255),
-    avatar_url TEXT,
-    role VARCHAR(50) DEFAULT 'member',
-    is_active BOOLEAN DEFAULT true,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    role user_role NOT NULL DEFAULT 'member'
+);
+
+-- TEAM table
+CREATE TABLE team (
+    team_id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    organization_id UUID NOT NULL REFERENCES organization(organization_id) ON DELETE CASCADE,
+    name VARCHAR(255) NOT NULL,
+    lead_user_id UUID REFERENCES "user"(user_id) ON DELETE SET NULL
+);
+
+-- TEAM_MEMBERSHIP table
+CREATE TABLE team_membership (
+    membership_id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    team_id UUID NOT NULL REFERENCES team(team_id) ON DELETE CASCADE,
+    user_id UUID NOT NULL REFERENCES "user"(user_id) ON DELETE CASCADE,
+    role_in_team team_role NOT NULL DEFAULT 'member',
+    UNIQUE(team_id, user_id)
 );
 
 -- PROJECT table
 CREATE TABLE project (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    name VARCHAR(255) NOT NULL,
-    key VARCHAR(10) UNIQUE NOT NULL,
-    description TEXT,
-    owner_id UUID REFERENCES "user"(id) ON DELETE SET NULL,
-    icon_url TEXT,
-    status VARCHAR(50) DEFAULT 'active',
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    project_id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    organization_id UUID NOT NULL REFERENCES organization(organization_id) ON DELETE CASCADE,
+    team_id UUID REFERENCES team(team_id) ON DELETE SET NULL,
+    name VARCHAR(255) NOT NULL
 );
 
 -- SPRINT table
 CREATE TABLE sprint (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    project_id UUID NOT NULL REFERENCES project(id) ON DELETE CASCADE,
+    sprint_id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    project_id UUID NOT NULL REFERENCES project(project_id) ON DELETE CASCADE,
     name VARCHAR(255) NOT NULL,
-    goal TEXT,
-    start_date TIMESTAMP,
-    end_date TIMESTAMP,
-    status VARCHAR(50) DEFAULT 'planned', -- planned, active, completed
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    start_date DATE NOT NULL,
+    end_date DATE NOT NULL,
+    status sprint_status NOT NULL DEFAULT 'planned',
+    total_points INTEGER NOT NULL DEFAULT 0,
+    completed_points INTEGER NOT NULL DEFAULT 0,
+    CONSTRAINT valid_dates CHECK (end_date >= start_date)
 );
 
 -- BACKLOG table
 CREATE TABLE backlog (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    project_id UUID NOT NULL REFERENCES project(id) ON DELETE CASCADE,
-    name VARCHAR(255) NOT NULL,
-    description TEXT,
-    priority INTEGER DEFAULT 0,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    backlog_id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    project_id UUID NOT NULL REFERENCES project(project_id) ON DELETE CASCADE,
+    name VARCHAR(255) NOT NULL
 );
 
 -- TASK table
 CREATE TABLE task (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    project_id UUID NOT NULL REFERENCES project(id) ON DELETE CASCADE,
-    sprint_id UUID REFERENCES sprint(id) ON DELETE SET NULL,
-    backlog_id UUID REFERENCES backlog(id) ON DELETE SET NULL,
+    task_id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    project_id UUID NOT NULL REFERENCES project(project_id) ON DELETE CASCADE,
+    sprint_id UUID REFERENCES sprint(sprint_id) ON DELETE SET NULL,
+    backlog_id UUID REFERENCES backlog(backlog_id) ON DELETE SET NULL,
+    assignee_id UUID REFERENCES "user"(user_id) ON DELETE SET NULL,
+    reporter_id UUID NOT NULL REFERENCES "user"(user_id) ON DELETE SET NULL,
     title VARCHAR(500) NOT NULL,
-    description TEXT,
-    status VARCHAR(50) DEFAULT 'todo', -- todo, in_progress, in_review, done
-    priority VARCHAR(50) DEFAULT 'medium', -- low, medium, high, critical
-    task_type VARCHAR(50) DEFAULT 'task', -- task, bug, story, epic
-    assignee_id UUID REFERENCES "user"(id) ON DELETE SET NULL,
-    reporter_id UUID REFERENCES "user"(id) ON DELETE SET NULL,
+    status task_status NOT NULL DEFAULT 'to_do',
+    priority task_priority NOT NULL DEFAULT 'medium',
+    task_type task_type NOT NULL DEFAULT 'task',
     story_points INTEGER,
-    estimated_hours DECIMAL(10, 2),
-    actual_hours DECIMAL(10, 2),
-    parent_task_id UUID REFERENCES task(id) ON DELETE SET NULL,
-    due_date TIMESTAMP,
-    completed_at TIMESTAMP,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    due_date DATE,
+    time_taken_to_complete INTEGER -- in hours or minutes, adjust as needed
 );
 
--- SPRINT_SCHEDULE table
-CREATE TABLE sprint_schedule (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    sprint_id UUID NOT NULL REFERENCES sprint(id) ON DELETE CASCADE,
-    event_type VARCHAR(100) NOT NULL, -- planning, daily_standup, review, retrospective
-    scheduled_date TIMESTAMP NOT NULL,
-    duration_minutes INTEGER,
-    location VARCHAR(255),
+-- POKER_SESSION table
+CREATE TABLE poker_session (
+    session_id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    sprint_id UUID NOT NULL REFERENCES sprint(sprint_id) ON DELETE CASCADE,
+    task_id UUID NOT NULL REFERENCES task(task_id) ON DELETE CASCADE,
+    created_by UUID NOT NULL REFERENCES "user"(user_id) ON DELETE SET NULL,
+    status poker_session_status NOT NULL DEFAULT 'voting',
+    final_estimate INTEGER
+);
+
+-- POKER_VOTE table
+CREATE TABLE poker_vote (
+    vote_id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    session_id UUID NOT NULL REFERENCES poker_session(session_id) ON DELETE CASCADE,
+    user_id UUID NOT NULL REFERENCES "user"(user_id) ON DELETE CASCADE,
+    vote_value INTEGER NOT NULL,
+    UNIQUE(session_id, user_id)
+);
+
+-- SPRINT_AVAILABILITY table
+CREATE TABLE sprint_availability (
+    availability_id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    sprint_id UUID NOT NULL REFERENCES sprint(sprint_id) ON DELETE CASCADE,
+    user_id UUID NOT NULL REFERENCES "user"(user_id) ON DELETE CASCADE,
+    submitted_by UUID NOT NULL REFERENCES "user"(user_id) ON DELETE SET NULL,
+    approved_by UUID REFERENCES "user"(user_id) ON DELETE SET NULL,
+    status availability_status NOT NULL DEFAULT 'pending',
+    submitted_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    approved_at TIMESTAMP,
+    availability_pattern JSONB NOT NULL,
+    total_hours DECIMAL(10, 2) NOT NULL,
+    working_days INTEGER NOT NULL,
+    half_days INTEGER NOT NULL DEFAULT 0,
+    off_days INTEGER NOT NULL,
     notes TEXT,
-    is_completed BOOLEAN DEFAULT false,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    UNIQUE(sprint_id, user_id)
 );
 
--- ANALYSIS table
-CREATE TABLE analysis (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    project_id UUID REFERENCES project(id) ON DELETE CASCADE,
-    sprint_id UUID REFERENCES sprint(id) ON DELETE CASCADE,
-    analysis_type VARCHAR(100) NOT NULL, -- velocity, burndown, productivity, quality
-    data JSONB NOT NULL,
-    summary TEXT,
-    insights TEXT[],
-    generated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    created_by UUID REFERENCES "user"(id) ON DELETE SET NULL
+-- USER_ANALYTICS table
+CREATE TABLE user_analytics (
+    analytics_id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    user_id UUID NOT NULL REFERENCES "user"(user_id) ON DELETE CASCADE,
+    sprint_id UUID NOT NULL REFERENCES sprint(sprint_id) ON DELETE CASCADE,
+    stories_completed INTEGER NOT NULL DEFAULT 0,
+    bugs_fixed INTEGER NOT NULL DEFAULT 0,
+    total_story_points INTEGER NOT NULL DEFAULT 0,
+    hours_logged DECIMAL(10, 2) NOT NULL DEFAULT 0,
+    hours_available DECIMAL(10, 2) NOT NULL DEFAULT 0,
+    utilization_rate DECIMAL(5, 2) GENERATED ALWAYS AS (
+        CASE 
+            WHEN hours_available > 0 THEN (hours_logged / hours_available) * 100 
+            ELSE 0 
+        END
+    ) STORED,
+    UNIQUE(user_id, sprint_id)
 );
 
--- METRICS table
-CREATE TABLE metrics (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    project_id UUID REFERENCES project(id) ON DELETE CASCADE,
-    sprint_id UUID REFERENCES sprint(id) ON DELETE CASCADE,
-    task_id UUID REFERENCES task(id) ON DELETE CASCADE,
-    metric_type VARCHAR(100) NOT NULL, -- velocity, cycle_time, lead_time, throughput, etc.
-    metric_name VARCHAR(255) NOT NULL,
-    value DECIMAL(15, 4) NOT NULL,
-    unit VARCHAR(50),
-    metadata JSONB,
-    recorded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+-- SPRINT_METRICS table
+CREATE TABLE sprint_metrics (
+    metrics_id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    sprint_id UUID NOT NULL UNIQUE REFERENCES sprint(sprint_id) ON DELETE CASCADE,
+    total_tasks INTEGER NOT NULL DEFAULT 0,
+    completed_tasks INTEGER NOT NULL DEFAULT 0,
+    total_points INTEGER NOT NULL DEFAULT 0,
+    completed_points INTEGER NOT NULL DEFAULT 0,
+    completion_percentage DECIMAL(5, 2) GENERATED ALWAYS AS (
+        CASE 
+            WHEN total_tasks > 0 THEN (completed_tasks::DECIMAL / total_tasks) * 100 
+            ELSE 0 
+        END
+    ) STORED
 );
 
--- Indexes for better query performance
-CREATE INDEX idx_user_email ON "user"(email);
-CREATE INDEX idx_user_username ON "user"(username);
+-- VELOCITY_DATA table
+CREATE TABLE velocity_data (
+    velocity_id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    metrics_id UUID NOT NULL REFERENCES sprint_metrics(metrics_id) ON DELETE CASCADE,
+    sprint_number INTEGER NOT NULL,
+    committed_points INTEGER NOT NULL,
+    completed_points INTEGER NOT NULL,
+    velocity DECIMAL(10, 2) GENERATED ALWAYS AS (
+        CASE 
+            WHEN committed_points > 0 THEN (completed_points::DECIMAL / committed_points) * 100 
+            ELSE 0 
+        END
+    ) STORED
+);
 
-CREATE INDEX idx_project_owner ON project(owner_id);
-CREATE INDEX idx_project_status ON project(status);
-
-CREATE INDEX idx_sprint_project ON sprint(project_id);
-CREATE INDEX idx_sprint_status ON sprint(status);
-CREATE INDEX idx_sprint_dates ON sprint(start_date, end_date);
-
-CREATE INDEX idx_backlog_project ON backlog(project_id);
-
-CREATE INDEX idx_task_project ON task(project_id);
-CREATE INDEX idx_task_sprint ON task(sprint_id);
-CREATE INDEX idx_task_backlog ON task(backlog_id);
-CREATE INDEX idx_task_assignee ON task(assignee_id);
-CREATE INDEX idx_task_reporter ON task(reporter_id);
-CREATE INDEX idx_task_status ON task(status);
-CREATE INDEX idx_task_priority ON task(priority);
-CREATE INDEX idx_task_parent ON task(parent_task_id);
-
-CREATE INDEX idx_sprint_schedule_sprint ON sprint_schedule(sprint_id);
-CREATE INDEX idx_sprint_schedule_date ON sprint_schedule(scheduled_date);
-
-CREATE INDEX idx_analysis_project ON analysis(project_id);
-CREATE INDEX idx_analysis_sprint ON analysis(sprint_id);
-CREATE INDEX idx_analysis_type ON analysis(analysis_type);
-
-CREATE INDEX idx_metrics_project ON metrics(project_id);
-CREATE INDEX idx_metrics_sprint ON metrics(sprint_id);
-CREATE INDEX idx_metrics_task ON metrics(task_id);
-CREATE INDEX idx_metrics_type ON metrics(metric_type);
-CREATE INDEX idx_metrics_recorded ON metrics(recorded_at);
-
--- Update timestamp trigger function
-CREATE OR REPLACE FUNCTION update_updated_at_column()
-RETURNS TRIGGER AS $$
-BEGIN
-    NEW.updated_at = CURRENT_TIMESTAMP;
-    RETURN NEW;
-END;
-$$ LANGUAGE plpgsql;
-
--- Apply update triggers to tables with updated_at
-CREATE TRIGGER update_user_updated_at BEFORE UPDATE ON "user"
-    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
-
-CREATE TRIGGER update_project_updated_at BEFORE UPDATE ON project
-    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
-
-CREATE TRIGGER update_sprint_updated_at BEFORE UPDATE ON sprint
-    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
-
-CREATE TRIGGER update_backlog_updated_at BEFORE UPDATE ON backlog
-    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
-
-CREATE TRIGGER update_task_updated_at BEFORE UPDATE ON task
-    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
-
-CREATE TRIGGER update_sprint_schedule_updated_at BEFORE UPDATE ON sprint_schedule
-    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+-- BURNDOWN_DATA table
+CREATE TABLE burndown_data (
+    burndown_id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    metrics_id UUID NOT NULL REFERENCES sprint_metrics(metrics_id) ON DELETE CASCADE,
+    entry_date DATE NOT NULL,
+    remaining_points INTEGER NOT NULL,
+    ideal_points INTEGER NOT NULL,
+    UNIQUE(metrics_id, entry_date)
+);
 
 COMMIT;
