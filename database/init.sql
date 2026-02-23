@@ -18,7 +18,10 @@ CREATE TYPE availability_status AS ENUM ('pending', 'approved', 'rejected');
 CREATE TABLE organization (
     organization_id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     name VARCHAR(255) NOT NULL,
-    subscription_tier subscription_tier NOT NULL DEFAULT 'free'
+    subscription_tier subscription_tier NOT NULL DEFAULT 'free',
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    deleted_at TIMESTAMP
 );
 
 -- USER table
@@ -27,7 +30,10 @@ CREATE TABLE "user" (
     organization_id UUID NOT NULL REFERENCES organization(organization_id) ON DELETE CASCADE,
     full_name VARCHAR(255) NOT NULL,
     email VARCHAR(255) UNIQUE NOT NULL,
-    role user_role NOT NULL DEFAULT 'member'
+    role user_role NOT NULL DEFAULT 'member',
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    deleted_at TIMESTAMP
 );
 
 -- TEAM table
@@ -35,7 +41,10 @@ CREATE TABLE team (
     team_id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     organization_id UUID NOT NULL REFERENCES organization(organization_id) ON DELETE CASCADE,
     name VARCHAR(255) NOT NULL,
-    lead_user_id UUID REFERENCES "user"(user_id) ON DELETE SET NULL
+    lead_user_id UUID REFERENCES "user"(user_id) ON DELETE SET NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    deleted_at TIMESTAMP
 );
 
 -- TEAM_MEMBERSHIP table
@@ -44,7 +53,10 @@ CREATE TABLE team_membership (
     team_id UUID NOT NULL REFERENCES team(team_id) ON DELETE CASCADE,
     user_id UUID NOT NULL REFERENCES "user"(user_id) ON DELETE CASCADE,
     role_in_team team_role NOT NULL DEFAULT 'member',
-    UNIQUE(team_id, user_id)
+    UNIQUE(team_id, user_id),
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    deleted_at TIMESTAMP
 );
 
 -- PROJECT table
@@ -52,7 +64,12 @@ CREATE TABLE project (
     project_id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     organization_id UUID NOT NULL REFERENCES organization(organization_id) ON DELETE CASCADE,
     team_id UUID REFERENCES team(team_id) ON DELETE SET NULL,
-    name VARCHAR(255) NOT NULL
+    name VARCHAR(255) NOT NULL,
+    key VARCHAR(10) UNIQUE NOT NULL,
+    task_counter INTEGER DEFAULT 0,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    deleted_at TIMESTAMP
 );
 
 -- SPRINT table
@@ -65,14 +82,20 @@ CREATE TABLE sprint (
     status sprint_status NOT NULL DEFAULT 'planned',
     total_points INTEGER NOT NULL DEFAULT 0,
     completed_points INTEGER NOT NULL DEFAULT 0,
-    CONSTRAINT valid_dates CHECK (end_date >= start_date)
+    CONSTRAINT valid_dates CHECK (end_date >= start_date),
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    deleted_at TIMESTAMP
 );
 
 -- BACKLOG table
 CREATE TABLE backlog (
     backlog_id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     project_id UUID NOT NULL REFERENCES project(project_id) ON DELETE CASCADE,
-    name VARCHAR(255) NOT NULL
+    name VARCHAR(255) NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    deleted_at TIMESTAMP
 );
 
 -- TASK table
@@ -84,12 +107,19 @@ CREATE TABLE task (
     assignee_id UUID REFERENCES "user"(user_id) ON DELETE SET NULL,
     reporter_id UUID NOT NULL REFERENCES "user"(user_id) ON DELETE SET NULL,
     title VARCHAR(500) NOT NULL,
+    description TEXT,
+    estimated_hours INTEGER,
     status task_status NOT NULL DEFAULT 'to_do',
     priority task_priority NOT NULL DEFAULT 'medium',
     task_type task_type NOT NULL DEFAULT 'task',
     story_points INTEGER,
     due_date DATE,
-    time_taken_to_complete INTEGER -- in hours or minutes, adjust as needed
+    time_taken_to_complete INTEGER, -- in hours or minutes, adjust as needed,
+    task_key VARCHAR(20),
+    tags TEXT[] DEFAULT '{}',
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    deleted_at TIMESTAMP
 );
 
 -- POKER_SESSION table
@@ -99,7 +129,10 @@ CREATE TABLE poker_session (
     task_id UUID NOT NULL REFERENCES task(task_id) ON DELETE CASCADE,
     created_by UUID NOT NULL REFERENCES "user"(user_id) ON DELETE SET NULL,
     status poker_session_status NOT NULL DEFAULT 'voting',
-    final_estimate INTEGER
+    final_estimate INTEGER,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    deleted_at TIMESTAMP
 );
 
 -- POKER_VOTE table
@@ -108,7 +141,10 @@ CREATE TABLE poker_vote (
     session_id UUID NOT NULL REFERENCES poker_session(session_id) ON DELETE CASCADE,
     user_id UUID NOT NULL REFERENCES "user"(user_id) ON DELETE CASCADE,
     vote_value INTEGER NOT NULL,
-    UNIQUE(session_id, user_id)
+    UNIQUE(session_id, user_id),
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    deleted_at TIMESTAMP
 );
 
 -- SPRINT_AVAILABILITY table
@@ -127,7 +163,10 @@ CREATE TABLE sprint_availability (
     half_days INTEGER NOT NULL DEFAULT 0,
     off_days INTEGER NOT NULL,
     notes TEXT,
-    UNIQUE(sprint_id, user_id)
+    UNIQUE(sprint_id, user_id),
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    deleted_at TIMESTAMP
 );
 
 -- USER_ANALYTICS table
@@ -146,7 +185,10 @@ CREATE TABLE user_analytics (
             ELSE 0 
         END
     ) STORED,
-    UNIQUE(user_id, sprint_id)
+    UNIQUE(user_id, sprint_id),
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    deleted_at TIMESTAMP
 );
 
 -- SPRINT_METRICS table
@@ -162,7 +204,10 @@ CREATE TABLE sprint_metrics (
             WHEN total_tasks > 0 THEN (completed_tasks::DECIMAL / total_tasks) * 100 
             ELSE 0 
         END
-    ) STORED
+    ) STORED,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    deleted_at TIMESTAMP
 );
 
 -- VELOCITY_DATA table
@@ -177,7 +222,10 @@ CREATE TABLE velocity_data (
             WHEN committed_points > 0 THEN (completed_points::DECIMAL / committed_points) * 100 
             ELSE 0 
         END
-    ) STORED
+    ) STORED,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    deleted_at TIMESTAMP
 );
 
 -- BURNDOWN_DATA table
@@ -187,7 +235,30 @@ CREATE TABLE burndown_data (
     entry_date DATE NOT NULL,
     remaining_points INTEGER NOT NULL,
     ideal_points INTEGER NOT NULL,
-    UNIQUE(metrics_id, entry_date)
+    UNIQUE(metrics_id, entry_date),
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    deleted_at TIMESTAMP
+);
+
+-- ── Seed data (development) ──────────────────────────────────────────────────
+INSERT INTO organization (organization_id, name)
+VALUES ('b0000000-0000-0000-0000-000000000001', 'Demo Organization');
+
+INSERT INTO "user" (user_id, organization_id, full_name, email)
+VALUES (
+    'c0000000-0000-0000-0000-000000000001',
+    'b0000000-0000-0000-0000-000000000001',
+    'Demo User',
+    'demo@example.com'
+);
+
+INSERT INTO project (project_id, organization_id, name, key)
+VALUES (
+    'a0000000-0000-0000-0000-000000000001',
+    'b0000000-0000-0000-0000-000000000001',
+    'Demo Project',
+    'DEMO'
 );
 
 COMMIT;

@@ -24,7 +24,7 @@ export default function SelectShowcase() {
       {/* Basic Select */}
       <div>
         <p className="text-sm font-medium mb-3 text-zinc-500 dark:text-zinc-400">
-          Select — issue status
+          Select - issue status
         </p>
         <SingleSelect
           label="Status"
@@ -42,7 +42,7 @@ export default function SelectShowcase() {
       {/* Select with icons */}
       <div>
         <p className="text-sm font-medium mb-3 text-zinc-500 dark:text-zinc-400">
-          Select with icons — issue type
+          Select with icons - issue type
         </p>
         <SingleSelect
           label="Issue Type"
@@ -63,7 +63,7 @@ export default function SelectShowcase() {
       {/* Select with error */}
       <div>
         <p className="text-sm font-medium mb-3 text-zinc-500 dark:text-zinc-400">
-          Select — error state
+          Select - error state
         </p>
         <SingleSelect
           label="Assignee"
@@ -78,7 +78,7 @@ export default function SelectShowcase() {
       {/* Radio Group */}
       <div>
         <p className="text-sm font-medium mb-3 text-zinc-500 dark:text-zinc-400">
-          Radio group — priority
+          Radio group - priority
         </p>
         <FormControl>
           <FormLabel>Priority</FormLabel>
@@ -106,7 +106,7 @@ export default function SelectShowcase() {
       {/* Number input (story points) */}
       <div>
         <p className="text-sm font-medium mb-3 text-zinc-500 dark:text-zinc-400">
-          Number field — story points
+          Number field - story points
         </p>
         <AppTextField
           label="Story Points"

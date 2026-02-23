@@ -28,6 +28,20 @@ To connect to db from dbeaver (see KS-9 task in jira for picture):
 - Username: root
 - Password: postgres
 
+# Database
+To get the types for every table and every attribute in the database, run command:
+- npm run db:codegen
+
+This generates 2 files in src\types:
+- db-meta.ts (used for available table and column names), names are used for executing sql queries and knowing what names exist
+- db.ts (used for table and column types), used for knowing what type everything is
+
+Make sure you have the database url in your .env.development file:
+- DATABASE_URL=postgresql://root:postgres@localhost:5555/jira-ultra-db
+
+Example you can use for writing your back-end mutations to the database:
+- src\server\tasks\tasks.ts
+
 
 ## Environment
 

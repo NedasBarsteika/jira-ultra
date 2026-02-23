@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 
-import CreateTaskModal from '@/components/modals-and-forms/CreateTaskModal';
+import TaskModal from '@/components/modals-and-forms/tasks/TaskModal';
 import CustomButton from '@/components/utils/buttons/CustomButton';
 import Modal from '@/components/utils/modals/Modal';
 
@@ -66,16 +66,16 @@ export default function ModalShowcase() {
         </Modal>
       </section>
 
-      {/* Create Task Modal (Custom Form) */}
+      {/* Task Modal (Create / Update) */}
       <section>
-        <h2 className="text-xl font-semibold mb-4">Create Task Modal (Custom Form)</h2>
+        <h2 className="text-xl font-semibold mb-4">Task Modal (Create / Update)</h2>
         <CustomButton color="success" onClick={() => setTaskOpen(true)}>
           Create New Task
         </CustomButton>
-        <CreateTaskModal
+        <TaskModal
           open={taskOpen}
           onClose={() => setTaskOpen(false)}
-          onSubmit={data => alert(`Task created: ${JSON.stringify(data, null, 2)}`)}
+          projectId="00000000-0000-0000-0000-000000000000"
         />
       </section>
     </div>

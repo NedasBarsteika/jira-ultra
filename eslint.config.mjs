@@ -76,5 +76,7 @@ export default defineConfig([
     'build/**',
     'node_modules/**',
     'next-env.d.ts',
+    'src/types/db.ts',
+    'src/types/db-meta.ts',
   ]),
 ]);

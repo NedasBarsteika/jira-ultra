@@ -19,7 +19,7 @@ export default function AvatarBadgeChipShowcase() {
       {/* Avatars */}
       <div>
         <p className="text-sm font-medium mb-3 text-zinc-500 dark:text-zinc-400">
-          Avatar — variants
+          Avatar - variants
         </p>
         <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', flexWrap: 'wrap' }}>
           <Tooltip title="Alice Johnson">
@@ -41,7 +41,7 @@ export default function AvatarBadgeChipShowcase() {
       {/* Avatar Group */}
       <div>
         <p className="text-sm font-medium mb-3 text-zinc-500 dark:text-zinc-400">
-          Avatar group — team members
+          Avatar group - team members
         </p>
         <AvatarGroup max={4}>
           {['AJ', 'BS', 'CW', 'DL', 'EM'].map((initials, i) => (
@@ -70,7 +70,7 @@ export default function AvatarBadgeChipShowcase() {
       {/* Badges */}
       <div>
         <p className="text-sm font-medium mb-3 text-zinc-500 dark:text-zinc-400">
-          Badge — counts &amp; indicators
+          Badge - counts &amp; indicators
         </p>
         <Box sx={{ display: 'flex', gap: 3, alignItems: 'center', flexWrap: 'wrap' }}>
           <Badge badgeContent={4} color="primary">
@@ -96,7 +96,7 @@ export default function AvatarBadgeChipShowcase() {
       {/* Chips */}
       <div>
         <p className="text-sm font-medium mb-3 text-zinc-500 dark:text-zinc-400">
-          Chip — labels &amp; tags (click × to delete)
+          Chip - labels &amp; tags (click × to delete)
         </p>
         <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
           {chips.map(chip => (
@@ -114,7 +114,7 @@ export default function AvatarBadgeChipShowcase() {
       {/* Chip variants */}
       <div>
         <p className="text-sm font-medium mb-3 text-zinc-500 dark:text-zinc-400">
-          Chip — variants &amp; colors
+          Chip - variants &amp; colors
         </p>
         <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
           <Chip label="Default" size="small" />
