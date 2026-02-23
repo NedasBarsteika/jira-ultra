@@ -23,21 +23,26 @@ export const MONTHS_FULL = [
   'December',
 ] as const;
 
-// Priority display config
-export const PRIORITY_CONFIG = [
-  { value: 'low', label: 'Low', color: 'text-gray-500' },
-  { value: 'medium', label: 'Medium', color: 'text-blue-500' },
-  { value: 'high', label: 'High', color: 'text-orange-500' },
-  { value: 'critical', label: 'Critical', color: 'text-red-500' },
-] as const;
-
-// Task status display config
-export const TASK_STATUS_CONFIG = [
-  { value: 'todo', label: 'To Do' },
-  { value: 'in_progress', label: 'In Progress' },
-  { value: 'in_review', label: 'In Review' },
-  { value: 'done', label: 'Done' },
-] as const;
+export const ALL_TAGS = [
+  'Frontend',
+  'Backend',
+  'UI',
+  'UX',
+  'Design',
+  'Database',
+  'DevOps',
+  'Infrastructure',
+  'Security',
+  'Performance',
+  'Analytics',
+  'Refactor',
+  'Mobile',
+  'QA',
+  'Testing',
+  'Payments',
+  'Documentation',
+  'Setup',
+];
 
 // Countries
 export interface Country {

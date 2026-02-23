@@ -25,7 +25,7 @@ export default function FeedbackShowcase() {
       {/* Tooltip */}
       <div>
         <p className="text-sm font-medium mb-3 text-zinc-500 dark:text-zinc-400">
-          Tooltip — placements &amp; arrow
+          Tooltip - placements &amp; arrow
         </p>
         <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap', alignItems: 'center' }}>
           <Tooltip title="Top tooltip" placement="top" arrow>
@@ -77,13 +77,13 @@ export default function FeedbackShowcase() {
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
           <Box>
             <Typography variant="caption" color="text.secondary">
-              Determinate — file upload ({uploadProgress}%)
+              Determinate - file upload ({uploadProgress}%)
             </Typography>
             <LinearProgress variant="determinate" value={uploadProgress} sx={{ mt: 0.5 }} />
           </Box>
           <Box>
             <Typography variant="caption" color="text.secondary">
-              Indeterminate — loading
+              Indeterminate - loading
             </Typography>
             <LinearProgress sx={{ mt: 0.5 }} />
           </Box>
@@ -142,7 +142,7 @@ export default function FeedbackShowcase() {
       {/* Toast */}
       <div>
         <p className="text-sm font-medium mb-3 text-zinc-500 dark:text-zinc-400">
-          Toast — via <code>useToast()</code>
+          Toast - via <code>useToast()</code>
         </p>
         <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
           <Button

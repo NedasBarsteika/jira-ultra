@@ -15,7 +15,8 @@ CREATE TABLE "user" (
     role VARCHAR(50) DEFAULT 'member',
     is_active BOOLEAN DEFAULT true,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    deleted_at TIMESTAMP
 );
 
 -- PROJECT table
@@ -27,8 +28,10 @@ CREATE TABLE project (
     owner_id UUID REFERENCES "user"(id) ON DELETE SET NULL,
     icon_url TEXT,
     status VARCHAR(50) DEFAULT 'active',
+    task_counter INTEGER DEFAULT 0,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    deleted_at TIMESTAMP
 );
 
 -- SPRINT table
@@ -41,7 +44,8 @@ CREATE TABLE sprint (
     end_date TIMESTAMP,
     status VARCHAR(50) DEFAULT 'planned', -- planned, active, completed
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    deleted_at TIMESTAMP
 );
 
 -- BACKLOG table
@@ -52,7 +56,8 @@ CREATE TABLE backlog (
     description TEXT,
     priority INTEGER DEFAULT 0,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    deleted_at TIMESTAMP
 );
 
 -- TASK table
@@ -72,10 +77,13 @@ CREATE TABLE task (
     estimated_hours DECIMAL(10, 2),
     actual_hours DECIMAL(10, 2),
     parent_task_id UUID REFERENCES task(id) ON DELETE SET NULL,
+    task_key VARCHAR(20),
+    tags TEXT[] DEFAULT '{}',
     due_date TIMESTAMP,
     completed_at TIMESTAMP,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    deleted_at TIMESTAMP
 );
 
 -- SPRINT_SCHEDULE table
@@ -89,7 +97,8 @@ CREATE TABLE sprint_schedule (
     notes TEXT,
     is_completed BOOLEAN DEFAULT false,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    deleted_at TIMESTAMP
 );
 
 -- ANALYSIS table
@@ -102,7 +111,8 @@ CREATE TABLE analysis (
     summary TEXT,
     insights TEXT[],
     generated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    created_by UUID REFERENCES "user"(id) ON DELETE SET NULL
+    created_by UUID REFERENCES "user"(id) ON DELETE SET NULL,
+    deleted_at TIMESTAMP
 );
 
 -- METRICS table
@@ -116,7 +126,8 @@ CREATE TABLE metrics (
     value DECIMAL(15, 4) NOT NULL,
     unit VARCHAR(50),
     metadata JSONB,
-    recorded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    recorded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    deleted_at TIMESTAMP
 );
 
 -- Indexes for better query performance
@@ -181,5 +192,17 @@ CREATE TRIGGER update_task_updated_at BEFORE UPDATE ON task
 
 CREATE TRIGGER update_sprint_schedule_updated_at BEFORE UPDATE ON sprint_schedule
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+-- ── Seed data (development) ──────────────────────────────────────────────────
+-- Fixed UUID so the boards page has a real project_id to reference
+-- until the full project system is built.
+INSERT INTO project (id, name, key, description, status)
+VALUES (
+    'a0000000-0000-0000-0000-000000000001',
+    'Demo Project',
+    'DEMO',
+    'Placeholder project for development',
+    'active'
+);
 
 COMMIT;

@@ -28,7 +28,7 @@ export default function AutocompleteShowcase() {
       {/* Country Select */}
       <div>
         <p className="text-sm font-medium mb-2 text-zinc-500 dark:text-zinc-400">
-          Country select — flag emoji, name &amp; dial code
+          Country select - flag emoji, name &amp; dial code
         </p>
         <CountrySelect value={country} onChange={setCountry} />
         {country && (
@@ -38,10 +38,10 @@ export default function AutocompleteShowcase() {
         )}
       </div>
 
-      {/* Single select — assignee */}
+      {/* Single select - assignee */}
       <div>
         <p className="text-sm font-medium mb-2 text-zinc-500 dark:text-zinc-400">
-          Single select — assignee
+          Single select - assignee
         </p>
         <SingleSelect
           label="Assignee"
@@ -54,7 +54,7 @@ export default function AutocompleteShowcase() {
       {/* Multi-select with chips */}
       <div>
         <p className="text-sm font-medium mb-2 text-zinc-500 dark:text-zinc-400">
-          Multi-select — issue labels
+          Multi-select - issue labels
         </p>
         <MultiSelect
           label="Labels"
@@ -67,7 +67,7 @@ export default function AutocompleteShowcase() {
       {/* Free solo */}
       <div>
         <p className="text-sm font-medium mb-2 text-zinc-500 dark:text-zinc-400">
-          Free solo — type or select a sprint
+          Free solo - type or select a sprint
         </p>
         <MultiSelect
           label="Sprint"
