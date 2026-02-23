@@ -65,5 +65,13 @@ export default defineConfig([
     },
   },
 
-  globalIgnores(['.next/**', 'out/**', 'build/**', 'node_modules/**', 'next-env.d.ts']),
+  globalIgnores([
+    '.next/**',
+    'out/**',
+    'build/**',
+    'node_modules/**',
+    'next-env.d.ts',
+    'src/types/db.ts',
+    'src/types/db-meta.ts',
+  ]),
 ]);
