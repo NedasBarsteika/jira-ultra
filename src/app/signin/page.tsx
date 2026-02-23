@@ -1,6 +1,5 @@
 'use client';
 import GitHubIcon from '@mui/icons-material/GitHub';
-import GoogleIcon from '@mui/icons-material/Google';
 import InputAdornment from '@mui/material/InputAdornment';
 import { Mail, Lock, ArrowRight } from 'lucide-react';
 import { redirect } from 'next/navigation';
@@ -13,7 +12,7 @@ import { Checkbox } from '@/components/utils/CheckBox';
 import { Input } from '@/components/utils/inputs/input';
 import { Label } from '@/components/utils/Label';
 import { signInSchema } from '@/lib/validation/auth';
-import { signInAction } from '@/server/auth/auth-actions';
+import { signInAction, signInSocialAction } from '@/server/auth/auth-actions';
 
 interface FieldErrors {
   email?:
@@ -32,6 +31,18 @@ export default function SignIn() {
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
   const [serverError, setServerError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+
+  async function handleSocialAuth(provider: 'github' | 'google') {
+    setIsLoading(true);
+
+    const result = await signInSocialAction(provider);
+
+    if (result?.error) {
+      setServerError(result.error);
+    }
+
+    setIsLoading(false);
+  }
 
   async function handleSubmit(e: React.SubmitEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -133,12 +144,12 @@ export default function SignIn() {
             <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <Label>Password</Label>
-                <button
+                {/* <button
                   type="button"
                   className="text-xs text-[#8b7cf7] hover:text-[#a78bfa] transition-colors"
                 >
                   Forgot password?
-                </button>
+                </button> */}
               </div>
               <div className="relative">
                 <Input
@@ -206,12 +217,17 @@ export default function SignIn() {
           </div>
 
           {/* Social login buttons */}
-          <div className="grid grid-cols-2 gap-3">
-            <CustomButton color="transparent" type="button" className="w-full">
+          <div className="gap-3">
+            {/* <CustomButton color="transparent" type="button" className="w-full">
               <GoogleIcon />
               Google
-            </CustomButton>
-            <CustomButton color="transparent" type="button" className="w-full">
+            </CustomButton> */}
+            <CustomButton
+              color="transparent"
+              type="button"
+              className="w-full"
+              onClick={() => void handleSocialAuth('github')}
+            >
               <GitHubIcon />
               GitHub
             </CustomButton>

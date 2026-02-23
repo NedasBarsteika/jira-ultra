@@ -1,6 +1,8 @@
 'use server';
 
+import { isRedirectError } from 'next/dist/client/components/redirect-error';
 import { headers } from 'next/headers';
+import { redirect } from 'next/navigation';
 import { ZodError } from 'zod';
 
 import { auth } from '@/lib/better-auth/auth';
@@ -74,6 +76,25 @@ export async function signInAction(formData: FormData) {
       serverError: 'Invalid email or password',
       success: false,
     };
+  }
+}
+
+export async function signInSocialAction(provider: 'github' | 'google') {
+  try {
+    const { url } = await auth.api.signInSocial({
+      body: {
+        provider,
+        callbackURL: '/',
+      },
+    });
+    if (url) {
+      redirect(url);
+    }
+  } catch (error) {
+    if (isRedirectError(error)) {
+      throw error;
+    }
+    return { error: 'Social login failed' };
   }
 }
 
