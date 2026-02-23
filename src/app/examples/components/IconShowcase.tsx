@@ -69,7 +69,7 @@ export default function IconShowcase() {
   return (
     <div className="flex flex-col gap-4">
       <p className="text-sm text-zinc-500 dark:text-zinc-400">
-        Hover for icon name. From <code>@mui/icons-material</code> — 2,100+ icons available.
+        Hover for icon name. From <code>@mui/icons-material</code> - 2,100+ icons available.
       </p>
       <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1.5 }}>
         {ICONS.map(({ Icon, name }) => (

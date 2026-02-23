@@ -43,7 +43,7 @@ export default function TextFieldShowcase() {
       {/* Multiline description */}
       <div>
         <p className="text-sm font-medium mb-3 text-zinc-500 dark:text-zinc-400">
-          Multiline — description
+          Multiline - description
         </p>
         <AppTextField
           label="Description"

@@ -15,7 +15,7 @@ export default function FABShowcase() {
       {/* Sizes */}
       <div>
         <p className="text-sm font-medium mb-3 text-zinc-500 dark:text-zinc-400">
-          Circular — sizes
+          Circular - sizes
         </p>
         <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
           <Tooltip title="Small" arrow>
@@ -66,7 +66,7 @@ export default function FABShowcase() {
       {/* Extended */}
       <div>
         <p className="text-sm font-medium mb-3 text-zinc-500 dark:text-zinc-400">
-          Extended — pill shape with label
+          Extended - pill shape with label
         </p>
         <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
           <Fab variant="extended" color="primary" size="medium">

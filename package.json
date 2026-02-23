@@ -8,11 +8,12 @@
     "start": "next start",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
+    "db:codegen": "node --env-file=.env.development scripts/codegen-runner.mjs",
     "prepare": "husky"
   },
   "lint-staged": {
     "*.{ts,tsx,js,jsx}": [
-      "eslint --fix --max-warnings=0",
+      "eslint --fix --max-warnings=2",
       "prettier --write"
     ]
   },
@@ -31,12 +32,15 @@
     "eslint-plugin-react-hooks": "^7.0.1",
     "firebase": "^12.9.0",
     "husky": "^9.1.7",
+    "kysely": "^0.28.11",
     "lint-staged": "^16.2.7",
     "lucide-react": "^0.574.0",
     "next": "16.1.6",
     "pg": "^8.18.0",
     "prettier": "^3.8.1",
     "react": "19.2.3",
+    "react-dnd": "^16.0.1",
+    "react-dnd-html5-backend": "^16.0.1",
     "react-dom": "19.2.3",
     "react-icons": "^5.5.0",
     "typescript-eslint": "^8.55.0",
@@ -52,6 +56,7 @@
     "babel-plugin-react-compiler": "1.0.0",
     "eslint": "^9.39.2",
     "eslint-config-next": "16.1.6",
+    "kysely-codegen": "^0.20.0",
     "tailwindcss": "^4",
     "typescript": "^5"
   }

@@ -85,7 +85,7 @@ export default function CheckboxShowcase() {
       {/* Filter group */}
       <div>
         <p className="text-sm font-medium mb-2 text-zinc-500 dark:text-zinc-400">
-          Filter group — issue types
+          Filter group - issue types
         </p>
         <FormControl component="fieldset">
           <FormLabel component="legend">Filter by type</FormLabel>

@@ -19,6 +19,8 @@ interface ModalProps {
   submitDisabled?: boolean;
   submitLoading?: boolean;
   cancelLabel?: string;
+  /** Optional content rendered on the left side of the footer. */
+  footerLeft?: ReactNode;
 }
 
 const sizeStyles: Record<ModalSize, string> = {
@@ -38,6 +40,7 @@ export default function Modal({
   submitDisabled = false,
   submitLoading = false,
   cancelLabel = 'Cancel',
+  footerLeft,
 }: ModalProps) {
   const panelRef = useRef<HTMLDivElement>(null);
 
@@ -105,20 +108,23 @@ export default function Modal({
         <div className="px-6 py-5">{children}</div>
 
         {/* Footer */}
-        <div className="flex items-center justify-end gap-3 border-t border-gray-200 px-6 py-4 dark:border-gray-700">
-          <CustomButton color="danger" onClick={onClose}>
-            {cancelLabel}
-          </CustomButton>
-          {submitLabel && (
-            <CustomButton
-              color="primary"
-              onClick={onSubmit}
-              disabled={submitDisabled}
-              loading={submitLoading}
-            >
-              {submitLabel}
+        <div className="flex items-center justify-between border-t border-gray-200 px-6 py-4 dark:border-gray-700">
+          <div>{footerLeft}</div>
+          <div className="flex items-center gap-3">
+            <CustomButton color="danger" onClick={onClose}>
+              {cancelLabel}
             </CustomButton>
-          )}
+            {submitLabel && (
+              <CustomButton
+                color="primary"
+                onClick={onSubmit}
+                disabled={submitDisabled}
+                loading={submitLoading}
+              >
+                {submitLabel}
+              </CustomButton>
+            )}
+          </div>
         </div>
       </div>
     </div>,
