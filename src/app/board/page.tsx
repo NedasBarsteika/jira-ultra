@@ -81,7 +81,8 @@ export default function BoardsPage() {
         ) : (
           <div className="flex flex-col gap-3 max-w-sm">
             {tasks?.map(task => (
-              <TaskCard key={task.id} task={task} onClick={openEdit} />
+              // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+              <TaskCard key={task.task_id} task={task} onClick={openEdit} />
             ))}
           </div>
         )}

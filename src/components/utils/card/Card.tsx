@@ -88,11 +88,12 @@ export default function TaskCard({ task, onClick }: TaskCardProps) {
   const [{ isDragging }, drag] = useDrag<{ id: string }, void, { isDragging: boolean }>(
     () => ({
       type: DRAG_TYPE,
-      item: { id: task?.id ?? '' },
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+      item: { id: task?.task_id ?? '' },
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
       collect: (monitor): { isDragging: boolean } => ({ isDragging: monitor.isDragging() }),
     }),
-    [task?.id]
+    [task?.task_id]
   );
 
   const priority = (task?.priority ?? 'medium') as Priority;

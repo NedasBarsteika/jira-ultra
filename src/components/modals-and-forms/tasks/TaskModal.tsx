@@ -19,7 +19,8 @@ const PLACEHOLDER_ASSIGNEES = [{ id: '', name: 'Unassigned' }];
 
 // reporter_id / sprint_id / backlog_id will be null until real auth + project
 // context are wired in.
-const PLACEHOLDER_REPORTER_ID = null;
+// TODO: replace with real authenticated user ID once auth is implemented
+const PLACEHOLDER_REPORTER_ID = 'c0000000-0000-0000-0000-000000000001';
 const PLACEHOLDER_SPRINT_ID = null;
 const PLACEHOLDER_BACKLOG_ID = null;
 
@@ -168,7 +169,7 @@ export default function TaskModal({ open, onClose, task, projectId, onSuccess }:
       setLoading(true);
 
       try {
-        const payload = {
+        const editableFields = {
           title: validated?.title,
           description: validated?.description?.trim() || null,
           priority: validated?.priority,
@@ -180,20 +181,24 @@ export default function TaskModal({ open, onClose, task, projectId, onSuccess }:
           estimated_hours: validated?.estimated_hours
             ? parseFloat(validated?.estimated_hours)
             : null,
-          reporter_id: PLACEHOLDER_REPORTER_ID,
-          sprint_id: PLACEHOLDER_SPRINT_ID,
-          backlog_id: PLACEHOLDER_BACKLOG_ID,
         };
 
         if (isUpdate) {
-          await updateTask(task.id, payload);
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+          await updateTask(task?.task_id, editableFields);
           toast.success('Task updated successfully');
         } else {
           if (!projectId) {
             toast.error('Project ID is required to create a task.');
             return;
           }
-          await createTask({ project_id: projectId, ...payload });
+          await createTask({
+            project_id: projectId,
+            ...editableFields,
+            reporter_id: PLACEHOLDER_REPORTER_ID,
+            sprint_id: PLACEHOLDER_SPRINT_ID,
+            backlog_id: PLACEHOLDER_BACKLOG_ID,
+          });
           toast.success('Task created successfully');
         }
 
@@ -223,10 +228,11 @@ export default function TaskModal({ open, onClose, task, projectId, onSuccess }:
   }
 
   async function handleDelete() {
-    if (!task?.id) return;
+    if (!task?.task_id) return;
     setDeleting(true);
     try {
-      await deleteTask(task?.id);
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+      await deleteTask(task?.task_id);
       toast.success('Task deleted');
       onSuccess?.();
       onClose();

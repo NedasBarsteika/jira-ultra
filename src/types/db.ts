@@ -5,6 +5,8 @@
 
 import type { ColumnType } from "kysely";
 
+export type AvailabilityStatus = "approved" | "pending" | "rejected";
+
 export type Generated<T> = T extends ColumnType<infer S, infer I, infer U>
   ? ColumnType<S, I | undefined, U>
   : ColumnType<T, T | undefined, T>;
@@ -23,133 +25,229 @@ export type JsonValue = JsonArray | JsonObject | JsonPrimitive;
 
 export type Numeric = ColumnType<string, number | string, number | string>;
 
+export type PokerSessionStatus = "completed" | "revealed" | "voting";
+
+export type SprintStatus = "active" | "closed" | "completed" | "planned";
+
+export type SubscriptionTier = "enterprise" | "free" | "pro";
+
+export type TaskPriority = "critical" | "high" | "low" | "medium";
+
+export type TaskStatus = "done" | "in_progress" | "review" | "test" | "to_do";
+
+export type TaskType = "bug" | "epic" | "spike" | "story" | "task";
+
+export type TeamRole = "admin" | "member" | "viewer";
+
 export type Timestamp = ColumnType<Date, Date | string, Date | string>;
 
-export interface Analysis {
-  analysis_type: string;
-  created_by: string | null;
-  data: Json;
-  deleted_at: Timestamp | null;
-  generated_at: Generated<Timestamp | null>;
-  id: Generated<string>;
-  insights: string[] | null;
-  project_id: string | null;
-  sprint_id: string | null;
-  summary: string | null;
-}
+export type UserRole = "leader" | "member" | "viewer";
 
 export interface Backlog {
-  created_at: Generated<Timestamp | null>;
+  backlog_id: Generated<string>;
+  created_at: Generated<Timestamp>;
   deleted_at: Timestamp | null;
-  description: string | null;
-  id: Generated<string>;
   name: string;
-  priority: Generated<number | null>;
   project_id: string;
-  updated_at: Generated<Timestamp | null>;
+  updated_at: Generated<Timestamp>;
 }
 
-export interface Metrics {
+export interface BurndownData {
+  burndown_id: Generated<string>;
+  created_at: Generated<Timestamp>;
   deleted_at: Timestamp | null;
-  id: Generated<string>;
-  metadata: Json | null;
-  metric_name: string;
-  metric_type: string;
-  project_id: string | null;
-  recorded_at: Generated<Timestamp | null>;
-  sprint_id: string | null;
-  task_id: string | null;
-  unit: string | null;
-  value: Numeric;
+  entry_date: Timestamp;
+  ideal_points: number;
+  metrics_id: string;
+  remaining_points: number;
+  updated_at: Generated<Timestamp>;
+}
+
+export interface Organization {
+  created_at: Generated<Timestamp>;
+  deleted_at: Timestamp | null;
+  name: string;
+  organization_id: Generated<string>;
+  subscription_tier: Generated<SubscriptionTier>;
+  updated_at: Generated<Timestamp>;
+}
+
+export interface PokerSession {
+  created_at: Generated<Timestamp>;
+  created_by: string;
+  deleted_at: Timestamp | null;
+  final_estimate: number | null;
+  session_id: Generated<string>;
+  sprint_id: string;
+  status: Generated<PokerSessionStatus>;
+  task_id: string;
+  updated_at: Generated<Timestamp>;
+}
+
+export interface PokerVote {
+  created_at: Generated<Timestamp>;
+  deleted_at: Timestamp | null;
+  session_id: string;
+  updated_at: Generated<Timestamp>;
+  user_id: string;
+  vote_id: Generated<string>;
+  vote_value: number;
 }
 
 export interface Project {
-  created_at: Generated<Timestamp | null>;
+  created_at: Generated<Timestamp>;
   deleted_at: Timestamp | null;
-  description: string | null;
-  icon_url: string | null;
-  id: Generated<string>;
   key: string;
   name: string;
-  owner_id: string | null;
-  status: Generated<string | null>;
+  organization_id: string;
+  project_id: Generated<string>;
   task_counter: Generated<number | null>;
-  updated_at: Generated<Timestamp | null>;
+  team_id: string | null;
+  updated_at: Generated<Timestamp>;
 }
 
 export interface Sprint {
-  created_at: Generated<Timestamp | null>;
+  completed_points: Generated<number>;
+  created_at: Generated<Timestamp>;
   deleted_at: Timestamp | null;
-  end_date: Timestamp | null;
-  goal: string | null;
-  id: Generated<string>;
+  end_date: Timestamp;
   name: string;
   project_id: string;
-  start_date: Timestamp | null;
-  status: Generated<string | null>;
-  updated_at: Generated<Timestamp | null>;
+  sprint_id: Generated<string>;
+  start_date: Timestamp;
+  status: Generated<SprintStatus>;
+  total_points: Generated<number>;
+  updated_at: Generated<Timestamp>;
 }
 
-export interface SprintSchedule {
-  created_at: Generated<Timestamp | null>;
+export interface SprintAvailability {
+  approved_at: Timestamp | null;
+  approved_by: string | null;
+  availability_id: Generated<string>;
+  availability_pattern: Json;
+  created_at: Generated<Timestamp>;
   deleted_at: Timestamp | null;
-  duration_minutes: number | null;
-  event_type: string;
-  id: Generated<string>;
-  is_completed: Generated<boolean | null>;
-  location: string | null;
+  half_days: Generated<number>;
   notes: string | null;
-  scheduled_date: Timestamp;
+  off_days: number;
   sprint_id: string;
-  updated_at: Generated<Timestamp | null>;
+  status: Generated<AvailabilityStatus>;
+  submitted_at: Generated<Timestamp | null>;
+  submitted_by: string;
+  total_hours: Numeric;
+  updated_at: Generated<Timestamp>;
+  user_id: string;
+  working_days: number;
+}
+
+export interface SprintMetrics {
+  completed_points: Generated<number>;
+  completed_tasks: Generated<number>;
+  completion_percentage: Generated<Numeric | null>;
+  created_at: Generated<Timestamp>;
+  deleted_at: Timestamp | null;
+  metrics_id: Generated<string>;
+  sprint_id: string;
+  total_points: Generated<number>;
+  total_tasks: Generated<number>;
+  updated_at: Generated<Timestamp>;
 }
 
 export interface Task {
-  actual_hours: Numeric | null;
   assignee_id: string | null;
   backlog_id: string | null;
-  completed_at: Timestamp | null;
-  created_at: Generated<Timestamp | null>;
+  created_at: Generated<Timestamp>;
   deleted_at: Timestamp | null;
   description: string | null;
   due_date: Timestamp | null;
-  estimated_hours: Numeric | null;
-  id: Generated<string>;
-  parent_task_id: string | null;
-  priority: Generated<string | null>;
+  estimated_hours: number | null;
+  priority: Generated<TaskPriority>;
   project_id: string;
-  reporter_id: string | null;
+  reporter_id: string;
   sprint_id: string | null;
-  status: Generated<string | null>;
+  status: Generated<TaskStatus>;
   story_points: number | null;
   tags: Generated<string[] | null>;
+  task_id: Generated<string>;
   task_key: string | null;
-  task_type: Generated<string | null>;
+  task_type: Generated<TaskType>;
+  time_taken_to_complete: number | null;
   title: string;
-  updated_at: Generated<Timestamp | null>;
+  updated_at: Generated<Timestamp>;
+}
+
+export interface Team {
+  created_at: Generated<Timestamp>;
+  deleted_at: Timestamp | null;
+  lead_user_id: string | null;
+  name: string;
+  organization_id: string;
+  team_id: Generated<string>;
+  updated_at: Generated<Timestamp>;
+}
+
+export interface TeamMembership {
+  created_at: Generated<Timestamp>;
+  deleted_at: Timestamp | null;
+  membership_id: Generated<string>;
+  role_in_team: Generated<TeamRole>;
+  team_id: string;
+  updated_at: Generated<Timestamp>;
+  user_id: string;
 }
 
 export interface User {
-  avatar_url: string | null;
-  created_at: Generated<Timestamp | null>;
+  created_at: Generated<Timestamp>;
   deleted_at: Timestamp | null;
   email: string;
-  full_name: string | null;
-  id: Generated<string>;
-  is_active: Generated<boolean | null>;
-  password_hash: string;
-  role: Generated<string | null>;
-  updated_at: Generated<Timestamp | null>;
-  username: string;
+  full_name: string;
+  organization_id: string;
+  role: Generated<UserRole>;
+  updated_at: Generated<Timestamp>;
+  user_id: Generated<string>;
+}
+
+export interface UserAnalytics {
+  analytics_id: Generated<string>;
+  bugs_fixed: Generated<number>;
+  created_at: Generated<Timestamp>;
+  deleted_at: Timestamp | null;
+  hours_available: Generated<Numeric>;
+  hours_logged: Generated<Numeric>;
+  sprint_id: string;
+  stories_completed: Generated<number>;
+  total_story_points: Generated<number>;
+  updated_at: Generated<Timestamp>;
+  user_id: string;
+  utilization_rate: Generated<Numeric | null>;
+}
+
+export interface VelocityData {
+  committed_points: number;
+  completed_points: number;
+  created_at: Generated<Timestamp>;
+  deleted_at: Timestamp | null;
+  metrics_id: string;
+  sprint_number: number;
+  updated_at: Generated<Timestamp>;
+  velocity: Generated<Numeric | null>;
+  velocity_id: Generated<string>;
 }
 
 export interface DB {
-  analysis: Analysis;
   backlog: Backlog;
-  metrics: Metrics;
+  burndown_data: BurndownData;
+  organization: Organization;
+  poker_session: PokerSession;
+  poker_vote: PokerVote;
   project: Project;
   sprint: Sprint;
-  sprint_schedule: SprintSchedule;
+  sprint_availability: SprintAvailability;
+  sprint_metrics: SprintMetrics;
   task: Task;
+  team: Team;
+  team_membership: TeamMembership;
   user: User;
+  user_analytics: UserAnalytics;
+  velocity_data: VelocityData;
 }

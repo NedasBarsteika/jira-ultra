@@ -3,7 +3,7 @@
 import type { Insertable, Selectable, Updateable } from 'kysely';
 
 import { db } from '@/lib/db';
-import type { Task as TaskType } from '@/types/db';
+import type { Task as TaskType, TaskStatus } from '@/types/db';
 import { Tables, Task, Project } from '@/types/db-meta';
 
 export type TaskRow = Selectable<TaskType>;
@@ -15,7 +15,7 @@ export async function getTask(id: string): Promise<TaskRow | undefined> {
   return db
     .selectFrom(Tables.task)
     .selectAll()
-    .where(Task.id, '=', id)
+    .where(Task.task_id, '=', id)
     .where(Task.deleted_at, 'is', null)
     .executeTakeFirst();
 }
@@ -25,7 +25,7 @@ export async function getTasks(filters?: {
   sprintId?: string;
   backlogId?: string;
   assigneeId?: string;
-  status?: string;
+  status?: TaskStatus;
 }): Promise<TaskRow[]> {
   if (!db) throw new Error('Database connection not initialized');
   let query = db.selectFrom(Tables.task).selectAll().where(Task.deleted_at, 'is', null);
@@ -45,7 +45,7 @@ export async function createTask(input: Omit<NewTask, typeof Task.task_key>): Pr
     const project = await trx
       .updateTable(Tables.project)
       .set(eb => ({ [Project.task_counter]: eb(Project.task_counter, '+', 1) }))
-      .where(Project.id, '=', input.project_id)
+      .where(Project.project_id, '=', input.project_id)
       .returning([Project.key, Project.task_counter])
       .executeTakeFirstOrThrow();
 
@@ -63,7 +63,7 @@ export async function updateTask(id: string, input: SafeTaskUpdate): Promise<Tas
   return db
     .updateTable(Tables.task)
     .set(input)
-    .where(Task.id, '=', id)
+    .where(Task.task_id, '=', id)
     .where(Task.deleted_at, 'is', null)
     .returningAll()
     .executeTakeFirst();
@@ -74,7 +74,7 @@ export async function deleteTask(id: string): Promise<TaskRow | undefined> {
   return db
     .updateTable(Tables.task)
     .set({ deleted_at: new Date() })
-    .where(Task.id, '=', id)
+    .where(Task.task_id, '=', id)
     .where(Task.deleted_at, 'is', null)
     .returningAll()
     .executeTakeFirst();
