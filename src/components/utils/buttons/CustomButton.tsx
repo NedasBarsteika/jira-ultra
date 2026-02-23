@@ -2,7 +2,7 @@
 
 import { type ButtonHTMLAttributes } from 'react';
 
-type ButtonColor = 'primary' | 'secondary' | 'danger' | 'success' | 'ghost';
+type ButtonColor = 'primary' | 'secondary' | 'danger' | 'success' | 'ghost' | 'transparent';
 type ButtonSize = 'sm' | 'md' | 'lg';
 type ButtonVariant = 'solid' | 'outline';
 
@@ -46,6 +46,10 @@ const colorStyles: Record<ButtonColor, Record<ButtonVariant, string>> = {
       'bg-transparent text-accent hover:bg-accent hover:text-accent-foreground active:bg-accent-foreground focus-visible:ring-accent-foreground',
     outline:
       'border-accent-foreground text-accent hover:bg-accent-foreground active:bg-accent-foreground focus-visible:ring-accent-foreground',
+  },
+  transparent: {
+    solid: 'border bg-background text-foreground hover:bg-accent hover:text-accent-foreground',
+    outline: 'border text-foreground hover:bg-accent hover:text-accent-foreground',
   },
 };
 
