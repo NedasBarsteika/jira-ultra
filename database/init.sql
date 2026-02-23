@@ -6,16 +6,59 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 -- USER table
 CREATE TABLE "user" (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    email VARCHAR(255) UNIQUE NOT NULL,
-    username VARCHAR(100) UNIQUE NOT NULL,
-    password_hash VARCHAR(255) NOT NULL,
-    full_name VARCHAR(255),
-    avatar_url TEXT,
+    id TEXT PRIMARY KEY,
+
+    -- better-auth fields (keep exact names)
+    name TEXT NOT NULL,
+    email TEXT NOT NULL UNIQUE,
+    "emailVerified" BOOLEAN NOT NULL,
+    image TEXT,
+    "createdAt" TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    -- custom fields
+    first_name VARCHAR(255),
+    last_name VARCHAR(255),
     role VARCHAR(50) DEFAULT 'member',
-    is_active BOOLEAN DEFAULT true,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    is_active BOOLEAN DEFAULT true
+);
+
+create table "session" (
+  id TEXT NOT NULL PRIMARY KEY,
+  "expiresAt" TIMESTAMPTZ NOT NULL,
+  token TEXT NOT NULL UNIQUE,
+  "createdAt" TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP NOT NULL,
+  "updatedAt" TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP NOT NULL,
+  "ipAddress" TEXT,
+  "userAgent" TEXT,
+  "userId" TEXT NOT NULL
+    REFERENCES "user" ("id") ON DELETE CASCADE
+);
+
+create table "account" (
+  id TEXT NOT NULL PRIMARY KEY,
+  "accountId" TEXT NOT NULL,
+  "providerId" TEXT NOT NULL,
+  "userId" TEXT NOT NULL
+    REFERENCES "user" ("id") ON DELETE CASCADE,
+  "accessToken" TEXT,
+  "refreshToken" TEXT,
+  "idToken" TEXT,
+  "accessTokenExpiresAt" TIMESTAMPTZ,
+  "refreshTokenExpiresAt" TIMESTAMPTZ,
+  scope TEXT,
+  password TEXT,
+  "createdAt" TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP NOT NULL,
+  "updatedAt" TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP NOT NULL
+);
+
+create table "verification" (
+  id TEXT NOT NULL PRIMARY KEY,
+  identifier TEXT NOT NULL,
+  value TEXT NOT NULL,
+  "expiresAt" TIMESTAMPTZ NOT NULL,
+  "createdAt" TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP NOT NULL,
+  "updatedAt" TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP NOT NULL
 );
 
 -- PROJECT table
@@ -24,7 +67,7 @@ CREATE TABLE project (
     name VARCHAR(255) NOT NULL,
     key VARCHAR(10) UNIQUE NOT NULL,
     description TEXT,
-    owner_id UUID REFERENCES "user"(id) ON DELETE SET NULL,
+    owner_id TEXT REFERENCES "user"(id) ON DELETE SET NULL,
     icon_url TEXT,
     status VARCHAR(50) DEFAULT 'active',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -66,8 +109,8 @@ CREATE TABLE task (
     status VARCHAR(50) DEFAULT 'todo', -- todo, in_progress, in_review, done
     priority VARCHAR(50) DEFAULT 'medium', -- low, medium, high, critical
     task_type VARCHAR(50) DEFAULT 'task', -- task, bug, story, epic
-    assignee_id UUID REFERENCES "user"(id) ON DELETE SET NULL,
-    reporter_id UUID REFERENCES "user"(id) ON DELETE SET NULL,
+    assignee_id TEXT REFERENCES "user"(id) ON DELETE SET NULL,
+    reporter_id TEXT REFERENCES "user"(id) ON DELETE SET NULL,
     story_points INTEGER,
     estimated_hours DECIMAL(10, 2),
     actual_hours DECIMAL(10, 2),
@@ -102,7 +145,7 @@ CREATE TABLE analysis (
     summary TEXT,
     insights TEXT[],
     generated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    created_by UUID REFERENCES "user"(id) ON DELETE SET NULL
+    created_by TEXT REFERENCES "user"(id) ON DELETE SET NULL
 );
 
 -- METRICS table
@@ -121,7 +164,7 @@ CREATE TABLE metrics (
 
 -- Indexes for better query performance
 CREATE INDEX idx_user_email ON "user"(email);
-CREATE INDEX idx_user_username ON "user"(username);
+CREATE INDEX idx_user_name ON "user"(name);
 
 CREATE INDEX idx_project_owner ON project(owner_id);
 CREATE INDEX idx_project_status ON project(status);
@@ -154,6 +197,13 @@ CREATE INDEX idx_metrics_task ON metrics(task_id);
 CREATE INDEX idx_metrics_type ON metrics(metric_type);
 CREATE INDEX idx_metrics_recorded ON metrics(recorded_at);
 
+CREATE INDEX session_userId_idx ON "session" ("userId");
+
+CREATE INDEX account_userId_idx ON "account" ("userId");
+
+CREATE INDEX verification_identifier_idx ON "verification" ("identifier");
+
+
 -- Update timestamp trigger function
 CREATE OR REPLACE FUNCTION update_updated_at_column()
 RETURNS TRIGGER AS $$
@@ -164,8 +214,6 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- Apply update triggers to tables with updated_at
-CREATE TRIGGER update_user_updated_at BEFORE UPDATE ON "user"
-    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
 CREATE TRIGGER update_project_updated_at BEFORE UPDATE ON project
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
