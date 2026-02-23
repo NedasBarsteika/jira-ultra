@@ -19,6 +19,7 @@ export const signUpSchema = z
         /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/,
         'Password must contain at least one lowercase letter, one uppercase letter and one number'
       ),
+    rememberMe: z.boolean(),
   })
   .refine(data => data.password === data.confirmPassword, {
     message: 'Passwords do not match',
@@ -34,6 +35,7 @@ export const signInSchema = z.object({
     .max(50, 'Email must not exceed 50 characters')
     .toLowerCase(),
   password: z.string().min(8, 'Password must be at least 8 characters'),
+  rememberMe: z.boolean(),
 });
 
 export type SignInInput = z.infer<typeof signInSchema>;

@@ -13,16 +13,18 @@ export async function signUpAction(formData: FormData) {
       email: formData.get('email'),
       name: formData.get('name'),
       password: formData.get('password'),
+      rememberMe: formData.get('remember') === 'on',
     };
     const validatedData = signUpSchema.parse(rawData);
 
-    const { email, name, password } = validatedData;
+    const { email, name, password, rememberMe } = validatedData;
 
     await auth.api.signUpEmail({
       body: {
         email,
         name,
         password,
+        rememberMe,
       },
     });
     return { success: true };
@@ -46,15 +48,17 @@ export async function signInAction(formData: FormData) {
     const rawData = {
       email: formData.get('email'),
       password: formData.get('password'),
+      rememberMe: formData.get('remember') === 'on',
     };
     const validatedData = signInSchema.parse(rawData);
 
-    const { email, password } = validatedData;
+    const { email, password, rememberMe } = validatedData;
 
     await auth.api.signInEmail({
       body: {
         email,
         password,
+        rememberMe,
       },
     });
     return { success: true };

@@ -45,6 +45,7 @@ export default function SignIn() {
     const values = {
       email: formData.get('email'),
       password: formData.get('password'),
+      rememberMe: formData.get('remember') === 'on',
     };
 
     const result = signInSchema.safeParse(values);
@@ -168,11 +169,7 @@ export default function SignIn() {
               <Label className="text-sm text-muted-foreground cursor-pointer">
                 {'Remember me'}
               </Label>
-              <Checkbox
-                id="remember"
-                // checked={rememberMe}
-                // onChange={e => setRememberMe(e.target.checked)}
-              />
+              <Checkbox id="remember" name="remember" />
             </div>
 
             {serverError && (
@@ -224,9 +221,9 @@ export default function SignIn() {
         {/* Sign up link */}
         <p className="text-center text-sm text-muted-foreground">
           {"Don't have an account? "}
-          <button className="text-[#8b7cf7] hover:text-[#a78bfa] transition-colors">
+          <a href="/signup" className="text-[#8b7cf7] hover:text-[#a78bfa] transition-colors">
             Sign up for free
-          </button>
+          </a>
         </p>
 
         {/* Footer */}
