@@ -3,13 +3,14 @@
  * Please do not edit it manually.
  */
 
-import type { ColumnType } from "kysely";
+import type { ColumnType } from 'kysely';
 
-export type AvailabilityStatus = "approved" | "pending" | "rejected";
+export type AvailabilityStatus = 'approved' | 'pending' | 'rejected';
 
-export type Generated<T> = T extends ColumnType<infer S, infer I, infer U>
-  ? ColumnType<S, I | undefined, U>
-  : ColumnType<T, T | undefined, T>;
+export type Generated<T> =
+  T extends ColumnType<infer S, infer I, infer U>
+    ? ColumnType<S, I | undefined, U>
+    : ColumnType<T, T | undefined, T>;
 
 export type Json = JsonValue;
 
@@ -25,23 +26,23 @@ export type JsonValue = JsonArray | JsonObject | JsonPrimitive;
 
 export type Numeric = ColumnType<string, number | string, number | string>;
 
-export type PokerSessionStatus = "completed" | "revealed" | "voting";
+export type PokerSessionStatus = 'completed' | 'revealed' | 'voting';
 
-export type SprintStatus = "active" | "closed" | "completed" | "planned";
+export type SprintStatus = 'active' | 'closed' | 'completed' | 'planned';
 
-export type SubscriptionTier = "enterprise" | "free" | "pro";
+export type SubscriptionTier = 'enterprise' | 'free' | 'pro';
 
-export type TaskPriority = "critical" | "high" | "low" | "medium";
+export type TaskPriority = 'critical' | 'high' | 'low' | 'medium';
 
-export type TaskStatus = "done" | "in_progress" | "review" | "test" | "to_do";
+export type TaskStatus = 'done' | 'in_progress' | 'review' | 'test' | 'to_do';
 
-export type TaskType = "bug" | "epic" | "spike" | "story" | "task";
+export type TaskType = 'bug' | 'epic' | 'spike' | 'story' | 'task';
 
-export type TeamRole = "admin" | "member" | "viewer";
+export type TeamRole = 'admin' | 'member' | 'viewer';
 
 export type Timestamp = ColumnType<Date, Date | string, Date | string>;
 
-export type UserRole = "leader" | "member" | "viewer";
+export type UserRole = 'leader' | 'member' | 'viewer';
 
 export interface Backlog {
   backlog_id: Generated<string>;

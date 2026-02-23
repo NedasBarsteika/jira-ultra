@@ -84,13 +84,12 @@ interface TaskCardProps {
 }
 
 export default function TaskCard({ task, onClick }: TaskCardProps) {
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call
   const [{ isDragging }, drag] = useDrag<{ id: string }, void, { isDragging: boolean }>(
     () => ({
       type: DRAG_TYPE,
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+
       item: { id: task?.task_id ?? '' },
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
+
       collect: (monitor): { isDragging: boolean } => ({ isDragging: monitor.isDragging() }),
     }),
     [task?.task_id]
@@ -103,7 +102,7 @@ export default function TaskCard({ task, onClick }: TaskCardProps) {
     color: priorityColor,
   } = priorityConfig[priority] ?? priorityConfig.medium;
 
-  const tags = (task?.tags ?? []) as string[];
+  const tags = task?.tags ?? [];
 
   return (
     <div
