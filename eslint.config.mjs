@@ -13,10 +13,7 @@ export default defineConfig([
   {
     files: ['**/*.{ts,tsx}'],
 
-    extends: [
-      ...tseslint.configs.recommendedTypeChecked,
-      prettierConfig,
-    ],
+    extends: [...tseslint.configs.recommendedTypeChecked, prettierConfig],
 
     languageOptions: {
       parserOptions: {
@@ -46,14 +43,7 @@ export default defineConfig([
       'import/order': [
         'warn',
         {
-          groups: [
-            'builtin',
-            'external',
-            'internal',
-            'parent',
-            'sibling',
-            'index',
-          ],
+          groups: ['builtin', 'external', 'internal', 'parent', 'sibling', 'index'],
           'newlines-between': 'always',
           alphabetize: { order: 'asc', caseInsensitive: true },
         },
@@ -66,15 +56,14 @@ export default defineConfig([
       ],
 
       // Prettier formatting
-      'prettier/prettier': 'error',
+      'prettier/prettier': [
+        'error',
+        {
+          endOfLine: 'auto',
+        },
+      ],
     },
   },
 
-  globalIgnores([
-    '.next/**',
-    'out/**',
-    'build/**',
-    'node_modules/**',
-    'next-env.d.ts',
-  ]),
+  globalIgnores(['.next/**', 'out/**', 'build/**', 'node_modules/**', 'next-env.d.ts']),
 ]);
