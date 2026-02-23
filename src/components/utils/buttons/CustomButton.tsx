@@ -20,16 +20,15 @@ interface CustomButtonProps extends Omit<ButtonHTMLAttributes<HTMLButtonElement>
 
 const colorStyles: Record<ButtonColor, Record<ButtonVariant, string>> = {
   primary: {
-    solid:
-      'bg-blue-600 text-white hover:bg-blue-700 active:bg-blue-800 focus-visible:ring-blue-500',
+    solid: 'bg-primary text-primary-foreground hover:bg-primary/70',
     outline:
-      'border-blue-600 text-blue-600 hover:bg-blue-50 active:bg-blue-100 focus-visible:ring-blue-500',
+      'border-primary text-primary hover:bg-blue-50 active:bg-blue-100 focus-visible:ring-blue-500',
   },
   secondary: {
     solid:
-      'bg-gray-600 text-white hover:bg-gray-700 active:bg-gray-800 focus-visible:ring-gray-500',
+      'bg-secondary text-secondary-foreground hover:bg-secondary/70 active:bg-secondary focus-visible:ring-secondary-foreground',
     outline:
-      'border-gray-600 text-gray-600 hover:bg-gray-50 active:bg-gray-100 focus-visible:ring-gray-500',
+      'border-secondary text-secondary hover:bg-gray-50 active:bg-gray-100 focus-visible:ring-gray-500',
   },
   danger: {
     solid: 'bg-red-600 text-white hover:bg-red-700 active:bg-red-800 focus-visible:ring-red-500',
@@ -44,9 +43,9 @@ const colorStyles: Record<ButtonColor, Record<ButtonVariant, string>> = {
   },
   ghost: {
     solid:
-      'bg-transparent text-gray-700 hover:bg-gray-100 active:bg-gray-200 focus-visible:ring-gray-400',
+      'bg-transparent text-accent hover:bg-accent hover:text-accent-foreground active:bg-accent-foreground focus-visible:ring-accent-foreground',
     outline:
-      'border-gray-300 text-gray-700 hover:bg-gray-100 active:bg-gray-200 focus-visible:ring-gray-400',
+      'border-accent-foreground text-accent hover:bg-accent-foreground active:bg-accent-foreground focus-visible:ring-accent-foreground',
   },
 };
 
@@ -73,7 +72,7 @@ export default function CustomButton({
   const isDisabled = disabled || loading;
 
   const baseStyles =
-    'inline-flex items-center justify-center font-medium rounded-md transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 cursor-pointer';
+    'inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive';
   const variantBase = variant === 'outline' ? 'border-2 bg-transparent' : '';
   const disabledStyles = isDisabled ? 'opacity-50 cursor-not-allowed pointer-events-none' : '';
   const widthStyles = fullWidth ? 'w-full' : '';
