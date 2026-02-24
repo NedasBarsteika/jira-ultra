@@ -5,12 +5,14 @@
 
 // All table names exactly as they appear in the database.
 export const Tables = {
+  account: 'account',
   backlog: 'backlog',
   burndown_data: 'burndown_data',
   organization: 'organization',
   poker_session: 'poker_session',
   poker_vote: 'poker_vote',
   project: 'project',
+  session: 'session',
   sprint: 'sprint',
   sprint_availability: 'sprint_availability',
   sprint_metrics: 'sprint_metrics',
@@ -20,9 +22,27 @@ export const Tables = {
   user: 'user',
   user_analytics: 'user_analytics',
   velocity_data: 'velocity_data',
+  verification: 'verification',
 } as const;
 
 export type TableName = keyof typeof Tables;
+
+// Runtime column names for the Account interface.
+export const Account = {
+  accessToken: 'accessToken',
+  accessTokenExpiresAt: 'accessTokenExpiresAt',
+  accountId: 'accountId',
+  createdAt: 'createdAt',
+  id: 'id',
+  idToken: 'idToken',
+  password: 'password',
+  providerId: 'providerId',
+  refreshToken: 'refreshToken',
+  refreshTokenExpiresAt: 'refreshTokenExpiresAt',
+  scope: 'scope',
+  updatedAt: 'updatedAt',
+  userId: 'userId',
+} as const;
 
 // Runtime column names for the Backlog interface.
 export const Backlog = {
@@ -84,13 +104,29 @@ export const PokerVote = {
 export const Project = {
   created_at: 'created_at',
   deleted_at: 'deleted_at',
+  description: 'description',
+  icon_url: 'icon_url',
   key: 'key',
   name: 'name',
   organization_id: 'organization_id',
+  owner_id: 'owner_id',
   project_id: 'project_id',
+  status: 'status',
   task_counter: 'task_counter',
   team_id: 'team_id',
   updated_at: 'updated_at',
+} as const;
+
+// Runtime column names for the Session interface.
+export const Session = {
+  createdAt: 'createdAt',
+  expiresAt: 'expiresAt',
+  id: 'id',
+  ipAddress: 'ipAddress',
+  token: 'token',
+  updatedAt: 'updatedAt',
+  userAgent: 'userAgent',
+  userId: 'userId',
 } as const;
 
 // Runtime column names for the Sprint interface.
@@ -191,14 +227,18 @@ export const TeamMembership = {
 
 // Runtime column names for the User interface.
 export const User = {
-  created_at: 'created_at',
-  deleted_at: 'deleted_at',
+  createdAt: 'createdAt',
   email: 'email',
-  full_name: 'full_name',
+  emailVerified: 'emailVerified',
+  first_name: 'first_name',
+  id: 'id',
+  image: 'image',
+  is_active: 'is_active',
+  last_name: 'last_name',
+  name: 'name',
   organization_id: 'organization_id',
   role: 'role',
-  updated_at: 'updated_at',
-  user_id: 'user_id',
+  updatedAt: 'updatedAt',
 } as const;
 
 // Runtime column names for the UserAnalytics interface.
@@ -228,4 +268,14 @@ export const VelocityData = {
   updated_at: 'updated_at',
   velocity: 'velocity',
   velocity_id: 'velocity_id',
+} as const;
+
+// Runtime column names for the Verification interface.
+export const Verification = {
+  createdAt: 'createdAt',
+  expiresAt: 'expiresAt',
+  id: 'id',
+  identifier: 'identifier',
+  updatedAt: 'updatedAt',
+  value: 'value',
 } as const;

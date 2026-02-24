@@ -42,7 +42,21 @@ export type TeamRole = 'admin' | 'member' | 'viewer';
 
 export type Timestamp = ColumnType<Date, Date | string, Date | string>;
 
-export type UserRole = 'leader' | 'member' | 'viewer';
+export interface Account {
+  accessToken: string | null;
+  accessTokenExpiresAt: Timestamp | null;
+  accountId: string;
+  createdAt: Generated<Timestamp>;
+  id: string;
+  idToken: string | null;
+  password: string | null;
+  providerId: string;
+  refreshToken: string | null;
+  refreshTokenExpiresAt: Timestamp | null;
+  scope: string | null;
+  updatedAt: Generated<Timestamp>;
+  userId: string;
+}
 
 export interface Backlog {
   backlog_id: Generated<string>;
@@ -98,13 +112,28 @@ export interface PokerVote {
 export interface Project {
   created_at: Generated<Timestamp>;
   deleted_at: Timestamp | null;
+  description: string | null;
+  icon_url: string | null;
   key: string;
   name: string;
   organization_id: string;
+  owner_id: string | null;
   project_id: Generated<string>;
+  status: Generated<string | null>;
   task_counter: Generated<number | null>;
   team_id: string | null;
   updated_at: Generated<Timestamp>;
+}
+
+export interface Session {
+  createdAt: Generated<Timestamp>;
+  expiresAt: Timestamp;
+  id: string;
+  ipAddress: string | null;
+  token: string;
+  updatedAt: Generated<Timestamp>;
+  userAgent: string | null;
+  userId: string;
 }
 
 export interface Sprint {
@@ -198,14 +227,18 @@ export interface TeamMembership {
 }
 
 export interface User {
-  created_at: Generated<Timestamp>;
-  deleted_at: Timestamp | null;
+  createdAt: Generated<Timestamp>;
   email: string;
-  full_name: string;
-  organization_id: string;
-  role: Generated<UserRole>;
-  updated_at: Generated<Timestamp>;
-  user_id: Generated<string>;
+  emailVerified: boolean;
+  first_name: string | null;
+  id: string;
+  image: string | null;
+  is_active: Generated<boolean | null>;
+  last_name: string | null;
+  name: string;
+  organization_id: string | null;
+  role: Generated<string | null>;
+  updatedAt: Generated<Timestamp>;
 }
 
 export interface UserAnalytics {
@@ -235,13 +268,24 @@ export interface VelocityData {
   velocity_id: Generated<string>;
 }
 
+export interface Verification {
+  createdAt: Generated<Timestamp>;
+  expiresAt: Timestamp;
+  id: string;
+  identifier: string;
+  updatedAt: Generated<Timestamp>;
+  value: string;
+}
+
 export interface DB {
+  account: Account;
   backlog: Backlog;
   burndown_data: BurndownData;
   organization: Organization;
   poker_session: PokerSession;
   poker_vote: PokerVote;
   project: Project;
+  session: Session;
   sprint: Sprint;
   sprint_availability: SprintAvailability;
   sprint_metrics: SprintMetrics;
@@ -251,4 +295,5 @@ export interface DB {
   user: User;
   user_analytics: UserAnalytics;
   velocity_data: VelocityData;
+  verification: Verification;
 }

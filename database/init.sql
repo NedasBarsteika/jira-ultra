@@ -295,12 +295,13 @@ CREATE TABLE burndown_data (
 INSERT INTO organization (organization_id, name)
 VALUES ('b0000000-0000-0000-0000-000000000001', 'Demo Organization');
 
-INSERT INTO "user" (id, organization_id, name, email)
+INSERT INTO "user" (id, organization_id, name, email, "emailVerified")
 VALUES (
     'c0000000-0000-0000-0000-000000000001',
     'b0000000-0000-0000-0000-000000000001',
     'Demo User',
-    'demo@example.com'
+    'demo@example.com',
+    false
 );
 
 INSERT INTO project (project_id, organization_id, name, key)
