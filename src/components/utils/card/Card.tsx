@@ -9,11 +9,8 @@ import FlameIcon from '@mui/icons-material/Whatshot';
 import Avatar from '@mui/material/Avatar';
 import Chip from '@mui/material/Chip';
 import Tooltip from '@mui/material/Tooltip';
-import { useDrag } from 'react-dnd';
 
 import type { TaskRow } from '@/server/tasks/tasks';
-
-export const DRAG_TYPE = 'TASK_CARD';
 
 // ── Priority config ───────────────────────────────────────────────────────────
 
@@ -59,9 +56,7 @@ function formatDueDate(date: Date | string): string {
   const now = new Date();
   const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
   const startOfDueDate = new Date(d.getFullYear(), d.getMonth(), d.getDate());
-  const diff = Math.round(
-    (startOfDueDate.getTime() - startOfToday.getTime()) / (1000 * 60 * 60 * 24)
-  );
+  const diff = Math.round((startOfDueDate.getTime() - startOfToday.getTime()) / (1000 * 60 * 60 * 24));
 
   if (diff < 0) return 'Overdue';
   if (diff === 0) return 'Today';
@@ -84,40 +79,20 @@ interface TaskCardProps {
 }
 
 export default function TaskCard({ task, onClick }: TaskCardProps) {
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call
-  const [{ isDragging }, drag] = useDrag<{ id: string }, void, { isDragging: boolean }>(
-    () => ({
-      type: DRAG_TYPE,
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-      item: { id: task?.task_id ?? '' },
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
-      collect: (monitor): { isDragging: boolean } => ({ isDragging: monitor.isDragging() }),
-    }),
-    [task?.task_id]
-  );
-
   const priority = (task?.priority ?? 'medium') as Priority;
-  const {
-    icon: PriorityIcon,
-    label: priorityLabel,
-    color: priorityColor,
-  } = priorityConfig[priority] ?? priorityConfig.medium;
+  const { icon: PriorityIcon, label: priorityLabel, color: priorityColor } =
+    priorityConfig[priority] ?? priorityConfig.medium;
 
   const tags = (task?.tags ?? []) as string[];
 
   return (
     <div
-      ref={drag as unknown as React.Ref<HTMLDivElement>}
       onClick={() => onClick?.(task)}
       className={[
         'bg-white dark:bg-gray-900 rounded-lg border border-gray-200/60 dark:border-gray-700/60',
-        'p-3 cursor-grab active:cursor-grabbing',
-        'transition-all duration-150 hover:shadow-lg hover:shadow-black/20 hover:border-violet-400/30',
+        'p-3 transition-all duration-150 hover:shadow-lg hover:shadow-black/20 hover:border-violet-400/30',
         'group select-none',
-        isDragging ? 'opacity-40 shadow-lg rotate-2 scale-105' : '',
-      ]
-        .filter(Boolean)
-        .join(' ')}
+      ].join(' ')}
     >
       {/* Header: task key + priority */}
       <div className="flex items-center justify-between mb-1.5">
@@ -149,7 +124,7 @@ export default function TaskCard({ task, onClick }: TaskCardProps) {
             const style = tagStyles[tag] ?? fallbackTag;
             return (
               <Chip
-                key={tag}
+                key={`${task.task_id}-${tag}`}
                 label={tag}
                 size="small"
                 sx={{
@@ -191,10 +166,7 @@ export default function TaskCard({ task, onClick }: TaskCardProps) {
         </div>
 
         {task?.due_date != null && (
-          <div
-            className="flex items-center gap-1 text-xs"
-            style={{ color: dueDateColor(task?.due_date) }}
-          >
+          <div className="flex items-center gap-1 text-xs" style={{ color: dueDateColor(task?.due_date) }}>
             <CalendarTodayIcon sx={{ fontSize: 12 }} />
             <span>{formatDueDate(task?.due_date)}</span>
           </div>
