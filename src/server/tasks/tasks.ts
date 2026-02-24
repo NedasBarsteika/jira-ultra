@@ -30,18 +30,19 @@ export async function getTasks(filters?: {
   if (!db) throw new Error('Database connection not initialized');
   let query = db.selectFrom(Tables.task).selectAll().where(Task.deleted_at, 'is', null);
 
-  if (filters?.projectId) query = query?.where(Task.project_id, '=', filters.projectId);
-  if (filters?.sprintId) query = query?.where(Task.sprint_id, '=', filters.sprintId);
-  if (filters?.backlogId) query = query?.where(Task.backlog_id, '=', filters.backlogId);
-  if (filters?.assigneeId) query = query?.where(Task.assignee_id, '=', filters.assigneeId);
-  if (filters?.status) query = query?.where(Task.status, '=', filters.status);
+  if (filters?.projectId) query = query.where(Task.project_id, '=', filters.projectId);
+  if (filters?.sprintId) query = query.where(Task.sprint_id, '=', filters.sprintId);
+  if (filters?.backlogId) query = query.where(Task.backlog_id, '=', filters.backlogId);
+  if (filters?.assigneeId) query = query.where(Task.assignee_id, '=', filters.assigneeId);
+  if (filters?.status) query = query.where(Task.status, '=', filters.status);
 
-  return query?.execute() ?? [];
+  return query.execute();
 }
 
 export async function createTask(input: Omit<NewTask, typeof Task.task_key>): Promise<TaskRow> {
   if (!db) throw new Error('Database connection not initialized');
-  return db?.transaction()?.execute(async trx => {
+
+  return db.transaction().execute(async trx => {
     const project = await trx
       .updateTable(Tables.project)
       .set(eb => ({ [Project.task_counter]: eb(Project.task_counter, '+', 1) }))
@@ -56,6 +57,7 @@ export async function createTask(input: Omit<NewTask, typeof Task.task_key>): Pr
       .executeTakeFirstOrThrow();
   });
 }
+
 type SafeTaskUpdate = Omit<TaskUpdate, 'id' | 'task_key' | 'created_at' | 'deleted_at'>;
 
 export async function updateTask(id: string, input: SafeTaskUpdate): Promise<TaskRow | undefined> {

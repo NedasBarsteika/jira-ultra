@@ -26,14 +26,60 @@ CREATE TABLE organization (
 
 -- USER table
 CREATE TABLE "user" (
-    user_id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    organization_id UUID NOT NULL REFERENCES organization(organization_id) ON DELETE CASCADE,
-    full_name VARCHAR(255) NOT NULL,
-    email VARCHAR(255) UNIQUE NOT NULL,
-    role user_role NOT NULL DEFAULT 'member',
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    deleted_at TIMESTAMP
+    id TEXT PRIMARY KEY,
+
+    -- better-auth fields (keep exact names)
+    name TEXT NOT NULL,
+    email TEXT NOT NULL UNIQUE,
+    "emailVerified" BOOLEAN NOT NULL,
+    image TEXT,
+    "createdAt" TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    -- custom fields
+    organization_id UUID REFERENCES organization(organization_id) ON DELETE CASCADE,
+    first_name VARCHAR(255),
+    last_name VARCHAR(255),
+    role VARCHAR(50) DEFAULT 'member',
+    is_active BOOLEAN DEFAULT true
+);
+
+create table "session" (
+  id TEXT NOT NULL PRIMARY KEY,
+  "expiresAt" TIMESTAMPTZ NOT NULL,
+  token TEXT NOT NULL UNIQUE,
+  "createdAt" TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP NOT NULL,
+  "updatedAt" TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP NOT NULL,
+  "ipAddress" TEXT,
+  "userAgent" TEXT,
+  "userId" TEXT NOT NULL
+    REFERENCES "user" ("id") ON DELETE CASCADE
+);
+
+create table "account" (
+  id TEXT NOT NULL PRIMARY KEY,
+  "accountId" TEXT NOT NULL,
+  "providerId" TEXT NOT NULL,
+  "userId" TEXT NOT NULL
+    REFERENCES "user" ("id") ON DELETE CASCADE,
+  "accessToken" TEXT,
+  "refreshToken" TEXT,
+  "idToken" TEXT,
+  "accessTokenExpiresAt" TIMESTAMPTZ,
+  "refreshTokenExpiresAt" TIMESTAMPTZ,
+  scope TEXT,
+  password TEXT,
+  "createdAt" TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP NOT NULL,
+  "updatedAt" TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP NOT NULL
+);
+
+create table "verification" (
+  id TEXT NOT NULL PRIMARY KEY,
+  identifier TEXT NOT NULL,
+  value TEXT NOT NULL,
+  "expiresAt" TIMESTAMPTZ NOT NULL,
+  "createdAt" TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP NOT NULL,
+  "updatedAt" TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP NOT NULL
 );
 
 -- TEAM table
@@ -41,7 +87,7 @@ CREATE TABLE team (
     team_id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     organization_id UUID NOT NULL REFERENCES organization(organization_id) ON DELETE CASCADE,
     name VARCHAR(255) NOT NULL,
-    lead_user_id UUID REFERENCES "user"(user_id) ON DELETE SET NULL,
+    lead_user_id TEXT REFERENCES "user"(id) ON DELETE SET NULL,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     deleted_at TIMESTAMP
@@ -51,7 +97,7 @@ CREATE TABLE team (
 CREATE TABLE team_membership (
     membership_id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     team_id UUID NOT NULL REFERENCES team(team_id) ON DELETE CASCADE,
-    user_id UUID NOT NULL REFERENCES "user"(user_id) ON DELETE CASCADE,
+    user_id TEXT NOT NULL REFERENCES "user"(id) ON DELETE CASCADE,
     role_in_team team_role NOT NULL DEFAULT 'member',
     UNIQUE(team_id, user_id),
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -66,6 +112,10 @@ CREATE TABLE project (
     team_id UUID REFERENCES team(team_id) ON DELETE SET NULL,
     name VARCHAR(255) NOT NULL,
     key VARCHAR(10) UNIQUE NOT NULL,
+    description TEXT,
+    owner_id TEXT REFERENCES "user"(id) ON DELETE SET NULL,
+    icon_url TEXT,
+    status VARCHAR(50) DEFAULT 'active',
     task_counter INTEGER DEFAULT 0,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -104,8 +154,8 @@ CREATE TABLE task (
     project_id UUID NOT NULL REFERENCES project(project_id) ON DELETE CASCADE,
     sprint_id UUID REFERENCES sprint(sprint_id) ON DELETE SET NULL,
     backlog_id UUID REFERENCES backlog(backlog_id) ON DELETE SET NULL,
-    assignee_id UUID REFERENCES "user"(user_id) ON DELETE SET NULL,
-    reporter_id UUID NOT NULL REFERENCES "user"(user_id) ON DELETE SET NULL,
+    assignee_id TEXT REFERENCES "user"(id) ON DELETE SET NULL,
+    reporter_id TEXT NOT NULL REFERENCES "user"(id) ON DELETE SET NULL,
     title VARCHAR(500) NOT NULL,
     description TEXT,
     estimated_hours INTEGER,
@@ -127,7 +177,7 @@ CREATE TABLE poker_session (
     session_id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     sprint_id UUID NOT NULL REFERENCES sprint(sprint_id) ON DELETE CASCADE,
     task_id UUID NOT NULL REFERENCES task(task_id) ON DELETE CASCADE,
-    created_by UUID NOT NULL REFERENCES "user"(user_id) ON DELETE SET NULL,
+    created_by TEXT NOT NULL REFERENCES "user"(id) ON DELETE SET NULL,
     status poker_session_status NOT NULL DEFAULT 'voting',
     final_estimate INTEGER,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -139,7 +189,7 @@ CREATE TABLE poker_session (
 CREATE TABLE poker_vote (
     vote_id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     session_id UUID NOT NULL REFERENCES poker_session(session_id) ON DELETE CASCADE,
-    user_id UUID NOT NULL REFERENCES "user"(user_id) ON DELETE CASCADE,
+    user_id TEXT NOT NULL REFERENCES "user"(id) ON DELETE CASCADE,
     vote_value INTEGER NOT NULL,
     UNIQUE(session_id, user_id),
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -151,9 +201,9 @@ CREATE TABLE poker_vote (
 CREATE TABLE sprint_availability (
     availability_id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     sprint_id UUID NOT NULL REFERENCES sprint(sprint_id) ON DELETE CASCADE,
-    user_id UUID NOT NULL REFERENCES "user"(user_id) ON DELETE CASCADE,
-    submitted_by UUID NOT NULL REFERENCES "user"(user_id) ON DELETE SET NULL,
-    approved_by UUID REFERENCES "user"(user_id) ON DELETE SET NULL,
+    user_id TEXT NOT NULL REFERENCES "user"(id) ON DELETE CASCADE,
+    submitted_by TEXT NOT NULL REFERENCES "user"(id) ON DELETE SET NULL,
+    approved_by TEXT REFERENCES "user"(id) ON DELETE SET NULL,
     status availability_status NOT NULL DEFAULT 'pending',
     submitted_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     approved_at TIMESTAMP,
@@ -172,7 +222,7 @@ CREATE TABLE sprint_availability (
 -- USER_ANALYTICS table
 CREATE TABLE user_analytics (
     analytics_id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    user_id UUID NOT NULL REFERENCES "user"(user_id) ON DELETE CASCADE,
+    user_id TEXT NOT NULL REFERENCES "user"(id) ON DELETE CASCADE,
     sprint_id UUID NOT NULL REFERENCES sprint(sprint_id) ON DELETE CASCADE,
     stories_completed INTEGER NOT NULL DEFAULT 0,
     bugs_fixed INTEGER NOT NULL DEFAULT 0,
@@ -245,12 +295,13 @@ CREATE TABLE burndown_data (
 INSERT INTO organization (organization_id, name)
 VALUES ('b0000000-0000-0000-0000-000000000001', 'Demo Organization');
 
-INSERT INTO "user" (user_id, organization_id, full_name, email)
+INSERT INTO "user" (id, organization_id, name, email, "emailVerified")
 VALUES (
     'c0000000-0000-0000-0000-000000000001',
     'b0000000-0000-0000-0000-000000000001',
     'Demo User',
-    'demo@example.com'
+    'demo@example.com',
+    false
 );
 
 INSERT INTO project (project_id, organization_id, name, key)
