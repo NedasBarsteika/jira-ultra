@@ -14,6 +14,10 @@ export default function ImageShowcase() {
             <CustomImage src="/images/art.png" alt="Art sample" width={200} height={150} />
           </div>
           <div>
+            <p className="text-sm text-zinc-500 mb-2">Default (logo)</p>
+            <CustomImage src="/images/full_logo.png" alt="Iterova" width={200} height={150} />
+          </div>
+          <div>
             <p className="text-sm text-zinc-500 mb-2">Contain</p>
             <CustomImage
               src="/images/art.png"

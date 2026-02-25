@@ -69,7 +69,7 @@ function taskToForm(task: TaskRow): FormState {
     priority: task?.priority ?? 'medium',
     task_type: task?.task_type ?? 'task',
     story_points: task?.story_points?.toString() ?? '',
-    tags: (task?.tags as string[] | null) ?? [],
+    tags: task?.tags ?? [],
     due_date: task?.due_date ? new Date(task?.due_date as unknown as string) : null,
     assignee_id: task?.assignee_id ?? '',
     estimated_hours: task?.estimated_hours?.toString() ?? '',
@@ -184,7 +184,6 @@ export default function TaskModal({ open, onClose, task, projectId, onSuccess }:
         };
 
         if (isUpdate) {
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
           await updateTask(task?.task_id, editableFields);
           toast.success('Task updated successfully');
         } else {
@@ -231,7 +230,6 @@ export default function TaskModal({ open, onClose, task, projectId, onSuccess }:
     if (!task?.task_id) return;
     setDeleting(true);
     try {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
       await deleteTask(task?.task_id);
       toast.success('Task deleted');
       onSuccess?.();

@@ -1,5 +1,8 @@
 import Link from 'next/link';
 
+import FigmaCheckboxShowcase from '@/app/examples/components/FigmaCheckboxShowcase';
+import InputShowcase from '@/app/examples/components/InputShowcase';
+
 import AutocompleteShowcase from './components/AutocompleteShowcase';
 import AvatarBadgeChipShowcase from './components/AvatarBadgeChipShowcase';
 import ButtonShowcase from './components/ButtonShowcase';
@@ -45,6 +48,9 @@ export default function ExamplesPage() {
         <ImageShowcase />
 
         {/* ── MUI components ── */}
+        <Section title="Custom MUI input field with label" />
+        <InputShowcase />
+
         <Section title="MUI · Autocomplete & Country Select" />
         <AutocompleteShowcase />
 
@@ -53,6 +59,9 @@ export default function ExamplesPage() {
 
         <Section title="MUI · Select, Radio & Number Input" />
         <SelectShowcase />
+
+        <Section title="Figma checkbox using MUI" />
+        <FigmaCheckboxShowcase />
 
         <Section title="MUI · Checkbox" />
         <CheckboxShowcase />

@@ -80,7 +80,7 @@ export default function TaskCard({ task, onClick }: TaskCardProps) {
   const { icon: PriorityIcon, label: priorityLabel, color: priorityColor } =
     priorityConfig[priority] ?? priorityConfig.medium;
 
-  const tags = (task?.tags ?? []) as string[];
+  const tags = task?.tags ?? [];
 
   const due = task?.due_date;
   const dueStyle = due ? dueDateTone(due) : null;

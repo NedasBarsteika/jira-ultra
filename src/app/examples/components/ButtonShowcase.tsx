@@ -63,6 +63,9 @@ export default function ButtonShowcase() {
           <CustomButton color="ghost" onClick={() => alert('Ghost clicked')}>
             Ghost
           </CustomButton>
+          <CustomButton color="transparent" onClick={() => alert('Transparent clicked')}>
+            Transparent
+          </CustomButton>
         </div>
       </section>
 
@@ -84,6 +87,9 @@ export default function ButtonShowcase() {
           </CustomButton>
           <CustomButton color="ghost" variant="outline">
             Ghost
+          </CustomButton>
+          <CustomButton color="transparent" variant="outline">
+            Transparent
           </CustomButton>
         </div>
       </section>

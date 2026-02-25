@@ -1,16 +1,49 @@
-@import "tailwindcss";
+@import 'tailwindcss';
 
-/* App base */
+/* App theme tokens */
 :root {
-  --background: #2f2f44; /* board background */
-  --foreground: #e9e9f2;
-}
+  --font-size: 16px;
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  /* Keep board palette (from your branch) */
+  --background: #2f2f44;
+  --foreground: #e9e9f2;
+
+  /* Keep the rest from master */
+  --card: #232040;
+  --card-foreground: #e4e6ef;
+  --popover: #2a2650;
+  --popover-foreground: #e4e6ef;
+  --primary: #8b7cf7;
+  --primary-foreground: #ffffff;
+  --secondary: #2e2a52;
+  --secondary-foreground: #c4c8e0;
+  --muted: #2e2a52;
+  --muted-foreground: #8d92ad;
+  --accent: #342f5c;
+  --accent-foreground: #e4e6ef;
+  --destructive: #e5395d;
+  --destructive-foreground: #ffffff;
+  --border: #3d3868;
+  --input: #2e2a52;
+  --input-background: #232040;
+  --switch-background: #4a4578;
+  --font-weight-medium: 500;
+  --font-weight-normal: 400;
+  --ring: #6d5fd6;
+  --chart-1: #8b7cf7;
+  --chart-2: #60a5fa;
+  --chart-3: #a78bfa;
+  --chart-4: #7eb8f0;
+  --chart-5: #c084fc;
+  --radius: 0.625rem;
+  --sidebar: #19162e;
+  --sidebar-foreground: #e4e6ef;
+  --sidebar-primary: #8b7cf7;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #2e2a52;
+  --sidebar-accent-foreground: #e4e6ef;
+  --sidebar-border: #3d3868;
+  --sidebar-ring: #6d5fd6;
 }
 
 /* If you still want automatic light mode later, keep this block.
@@ -22,34 +55,108 @@
   }
 }
 
-*,
-*::before,
-*::after {
-  box-sizing: border-box;
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-input-background: var(--input-background);
+  --color-switch-background: var(--switch-background);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
 }
 
-html,
-body {
-  height: 100%;
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+  }
+
+  /**
+  * Default typography styles for HTML elements (h1-h4, p, label, button, input).
+  * These are in @layer base, so Tailwind utility classes (like text-sm, text-lg) automatically override them.
+  */
+  html {
+    font-size: var(--font-size);
+  }
+
+  h1 {
+    font-size: var(--text-2xl);
+    font-weight: var(--font-weight-medium);
+    line-height: 1.5;
+  }
+
+  h2 {
+    font-size: var(--text-xl);
+    font-weight: var(--font-weight-medium);
+    line-height: 1.5;
+  }
+
+  h3 {
+    font-size: var(--text-lg);
+    font-weight: var(--font-weight-medium);
+    line-height: 1.5;
+  }
+
+  h4 {
+    font-size: var(--text-base);
+    font-weight: var(--font-weight-medium);
+    line-height: 1.5;
+  }
+
+  label {
+    font-size: var(--text-base);
+    font-weight: var(--font-weight-medium);
+    line-height: 1.5;
+  }
+
+  button {
+    font-size: var(--text-base);
+    font-weight: var(--font-weight-medium);
+    line-height: 1.5;
+  }
+
+  input {
+    font-size: var(--text-base);
+    font-weight: var(--font-weight-normal);
+    line-height: 1.5;
+  }
 }
 
-body {
-  margin: 0;
-  background: var(--background);
-  color: var(--foreground);
-  font-family: var(--font-sans), ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Arial,
-    "Helvetica Neue", "Noto Sans", "Liberation Sans", sans-serif;
-  line-height: 1.35;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-/* nicer selection */
-::selection {
-  background: rgba(167, 139, 250, 0.35);
-}
-
-/* modal animation */
+/* your modal animation (from your branch) */
 @keyframes modal-enter {
   from {
     opacity: 0;
