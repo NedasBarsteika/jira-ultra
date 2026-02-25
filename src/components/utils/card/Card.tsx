@@ -59,9 +59,14 @@ function formatDueDate(date: Date | string): string {
 }
 
 function dueDateTone(date: Date | string): { color: string; bg: string } {
-  const diff = Math.ceil((new Date(date).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24));
-  if (diff < 0) return { color: '#fca5a5', bg: 'rgba(248,113,113,0.12)' };
-  if (diff <= 2) return { color: '#fcd34d', bg: 'rgba(251,191,36,0.12)' };
+  const d = new Date(date);
+  const now = new Date();
+  const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const startOfDueDate = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+  const diffDays = Math.round((startOfDueDate.getTime() - startOfToday.getTime()) / (1000 * 60 * 60 * 24));
+  
+  if (diffDays < 0) return { color: '#fca5a5', bg: 'rgba(248,113,113,0.12)' };
+  if (diffDays <= 2) return { color: '#fcd34d', bg: 'rgba(251,191,36,0.12)' };
   return { color: 'rgba(255,255,255,0.70)', bg: 'rgba(255,255,255,0.08)' };
 }
 
@@ -81,19 +86,31 @@ export default function TaskCard({ task, onClick }: TaskCardProps) {
   const dueStyle = due ? dueDateTone(due) : null;
 
   const rawKey = (task?.task_key ?? '-') as string;
-  const cleanKey = rawKey.replace(/^[\s⋮⠿]+/g, ''); // ✅ nuima “⋮⋮” ir pan.
+  const cleanKey = rawKey.replace(/^[\s⋮⠿]+/g, ''); // Remove leading decorative characters
+
+  const handleCardKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      if (e.key === ' ') e.preventDefault();
+      onClick?.(task);
+    }
+  };
 
   return (
     <div
+      role="button"
+      tabIndex={0}
       onClick={() => onClick?.(task)}
+      onKeyDown={handleCardKeyDown}
       className={[
         'w-full',
         'rounded-xl border border-white/10 bg-white/5',
         'p-3',
         'transition-all duration-150',
-        'hover:bg-white/7 hover:border-white/15 hover:shadow-[0_10px_30px_rgba(0,0,0,0.25)]',
+        'hover:bg-white/[.07] hover:border-white/[.15] hover:shadow-[0_10px_30px_rgba(0,0,0,0.25)]',
+        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40 focus-visible:ring-offset-2 focus-visible:ring-offset-transparent',
         'cursor-pointer select-none',
       ].join(' ')}
+      aria-label={`Task: ${task?.title ?? 'Untitled'}`}
     >
       <div className="flex items-center justify-between">
         <span className="text-[11px] text-white/55">{cleanKey}</span>
@@ -121,11 +138,11 @@ export default function TaskCard({ task, onClick }: TaskCardProps) {
 
       {tags.length > 0 && (
         <div className="flex flex-wrap gap-1 mt-2">
-          {tags.slice(0, 4).map(tag => {
+          {tags.slice(0, 4).map((tag, idx) => {
             const style = tagStyles[tag] ?? fallbackTag;
             return (
               <Chip
-                key={`${task.task_id}-${tag}`}
+                key={`${task.task_id}-${tag}-${idx}`}
                 label={tag}
                 size="small"
                 sx={{
@@ -164,7 +181,7 @@ export default function TaskCard({ task, onClick }: TaskCardProps) {
           </Tooltip>
 
           {task?.story_points != null && (
-            <span className="text-[10px] rounded-md bg-white/8 text-white/70 px-2 py-0.5">
+            <span className="text-[10px] rounded-md bg-white/[.08] text-white/70 px-2 py-0.5">
               {task.story_points} SP
             </span>
           )}
