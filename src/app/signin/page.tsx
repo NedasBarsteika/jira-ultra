@@ -9,6 +9,7 @@ import { treeifyError } from 'zod';
 
 import CustomButton from '@/components/utils/buttons/CustomButton';
 import { Checkbox } from '@/components/utils/CheckBox';
+import CustomImage from '@/components/utils/images/Image';
 import { Input } from '@/components/utils/inputs/input';
 import { Label } from '@/components/utils/Label';
 import { signInSchema } from '@/lib/validation/auth';
@@ -99,7 +100,7 @@ export default function SignIn() {
           <div className="relative">
             {/* Subtle glow behind logo */}
             <div className="absolute inset-0 bg-linear-to-br from-[#8b7cf7]/15 to-[#60a5fa]/15 blur-3xl rounded-full scale-150" />
-            {/* <img src={logoImg} alt="Iterova" className="relative h-16 w-16 object-contain" /> */}
+            <CustomImage src="/images/full_logo.png" alt="Iterova" width={200} height={150} />
           </div>
           <div className="text-center">
             <h1 className="text-2xl">Welcome back</h1>
