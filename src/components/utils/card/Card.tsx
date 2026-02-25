@@ -12,44 +12,38 @@ import Tooltip from '@mui/material/Tooltip';
 
 import type { TaskRow } from '@/server/tasks/tasks';
 
-// ── Priority config ───────────────────────────────────────────────────────────
-
 type Priority = 'critical' | 'high' | 'medium' | 'low';
 
 const priorityConfig: Record<Priority, { icon: React.ElementType; label: string; color: string }> =
   {
-    critical: { icon: FlameIcon, label: 'Critical', color: '#f87171' },
-    high: { icon: ArrowUpIcon, label: 'High', color: '#fb923c' },
-    medium: { icon: MinusIcon, label: 'Medium', color: '#facc15' },
+    critical: { icon: FlameIcon, label: 'Critical', color: '#fb7185' },
+    high: { icon: ArrowUpIcon, label: 'High', color: '#fbbf24' },
+    medium: { icon: MinusIcon, label: 'Medium', color: '#a78bfa' },
     low: { icon: ArrowDownIcon, label: 'Low', color: '#60a5fa' },
   };
 
-// ── Tag colours (mirrors Figma palette) ──────────────────────────────────────
-
 const tagStyles: Record<string, { bg: string; color: string }> = {
-  Design: { bg: 'rgba(236,72,153,0.15)', color: '#f9a8d4' },
-  UX: { bg: 'rgba(217,70,239,0.15)', color: '#e879f9' },
-  DevOps: { bg: 'rgba(249,115,22,0.15)', color: '#fdba74' },
-  Infrastructure: { bg: 'rgba(120,113,108,0.15)', color: '#d6d3d1' },
-  Frontend: { bg: 'rgba(14,165,233,0.15)', color: '#7dd3fc' },
-  Backend: { bg: 'rgba(99,102,241,0.15)', color: '#a5b4fc' },
-  UI: { bg: 'rgba(139,92,246,0.15)', color: '#c4b5fd' },
-  Documentation: { bg: 'rgba(20,184,166,0.15)', color: '#5eead4' },
-  Security: { bg: 'rgba(239,68,68,0.15)', color: '#fca5a5' },
-  Performance: { bg: 'rgba(16,185,129,0.15)', color: '#6ee7b7' },
-  Analytics: { bg: 'rgba(6,182,212,0.15)', color: '#67e8f9' },
-  Refactor: { bg: 'rgba(245,158,11,0.15)', color: '#fcd34d' },
-  Mobile: { bg: 'rgba(132,204,22,0.15)', color: '#bef264' },
-  QA: { bg: 'rgba(244,63,94,0.15)', color: '#fda4af' },
-  Payments: { bg: 'rgba(34,197,94,0.15)', color: '#86efac' },
-  Testing: { bg: 'rgba(59,130,246,0.15)', color: '#93c5fd' },
-  Setup: { bg: 'rgba(100,116,139,0.15)', color: '#cbd5e1' },
-  Database: { bg: 'rgba(168,85,247,0.15)', color: '#d8b4fe' },
+  Design: { bg: 'rgba(236,72,153,0.18)', color: '#f9a8d4' },
+  UX: { bg: 'rgba(217,70,239,0.18)', color: '#e879f9' },
+  DevOps: { bg: 'rgba(249,115,22,0.18)', color: '#fdba74' },
+  Infrastructure: { bg: 'rgba(120,113,108,0.18)', color: '#d6d3d1' },
+  Frontend: { bg: 'rgba(14,165,233,0.18)', color: '#7dd3fc' },
+  Backend: { bg: 'rgba(99,102,241,0.18)', color: '#a5b4fc' },
+  UI: { bg: 'rgba(139,92,246,0.18)', color: '#c4b5fd' },
+  Documentation: { bg: 'rgba(20,184,166,0.18)', color: '#5eead4' },
+  Security: { bg: 'rgba(239,68,68,0.18)', color: '#fca5a5' },
+  Performance: { bg: 'rgba(16,185,129,0.18)', color: '#6ee7b7' },
+  Analytics: { bg: 'rgba(6,182,212,0.18)', color: '#67e8f9' },
+  Refactor: { bg: 'rgba(245,158,11,0.18)', color: '#fcd34d' },
+  Mobile: { bg: 'rgba(132,204,22,0.18)', color: '#bef264' },
+  QA: { bg: 'rgba(244,63,94,0.18)', color: '#fda4af' },
+  Payments: { bg: 'rgba(34,197,94,0.18)', color: '#86efac' },
+  Testing: { bg: 'rgba(59,130,246,0.18)', color: '#93c5fd' },
+  Setup: { bg: 'rgba(100,116,139,0.18)', color: '#cbd5e1' },
+  Database: { bg: 'rgba(168,85,247,0.18)', color: '#d8b4fe' },
 };
 
-const fallbackTag = { bg: 'rgba(107,114,128,0.15)', color: '#d1d5db' };
-
-// ── Helpers ───────────────────────────────────────────────────────────────────
+const fallbackTag = { bg: 'rgba(255,255,255,0.10)', color: 'rgba(255,255,255,0.75)' };
 
 function formatDueDate(date: Date | string): string {
   const d = new Date(date);
@@ -64,14 +58,12 @@ function formatDueDate(date: Date | string): string {
   return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
 }
 
-function dueDateColor(date: Date | string): string {
+function dueDateTone(date: Date | string): { color: string; bg: string } {
   const diff = Math.ceil((new Date(date).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24));
-  if (diff < 0) return '#f87171';
-  if (diff <= 2) return '#fbbf24';
-  return '#9ca3af';
+  if (diff < 0) return { color: '#fca5a5', bg: 'rgba(248,113,113,0.12)' };
+  if (diff <= 2) return { color: '#fcd34d', bg: 'rgba(251,191,36,0.12)' };
+  return { color: 'rgba(255,255,255,0.70)', bg: 'rgba(255,255,255,0.08)' };
 }
-
-// ── Component ─────────────────────────────────────────────────────────────────
 
 interface TaskCardProps {
   task: TaskRow;
@@ -85,18 +77,27 @@ export default function TaskCard({ task, onClick }: TaskCardProps) {
 
   const tags = (task?.tags ?? []) as string[];
 
+  const due = task?.due_date;
+  const dueStyle = due ? dueDateTone(due) : null;
+
+  const rawKey = (task?.task_key ?? '-') as string;
+  const cleanKey = rawKey.replace(/^[\s⋮⠿]+/g, ''); // ✅ nuima “⋮⋮” ir pan.
+
   return (
     <div
       onClick={() => onClick?.(task)}
       className={[
-        'bg-white dark:bg-gray-900 rounded-lg border border-gray-200/60 dark:border-gray-700/60',
-        'p-3 transition-all duration-150 hover:shadow-lg hover:shadow-black/20 hover:border-violet-400/30',
-        'group select-none',
+        'w-full',
+        'rounded-xl border border-white/10 bg-white/5',
+        'p-3',
+        'transition-all duration-150',
+        'hover:bg-white/7 hover:border-white/15 hover:shadow-[0_10px_30px_rgba(0,0,0,0.25)]',
+        'cursor-pointer select-none',
       ].join(' ')}
     >
-      {/* Header: task key + priority */}
-      <div className="flex items-center justify-between mb-1.5">
-        <span className="text-xs text-gray-500 dark:text-gray-400">{task?.task_key ?? '-'}</span>
+      <div className="flex items-center justify-between">
+        <span className="text-[11px] text-white/55">{cleanKey}</span>
+
         <Tooltip title={`${priorityLabel} priority`} placement="top" arrow>
           <span className="flex items-center" style={{ color: priorityColor }}>
             <PriorityIcon sx={{ fontSize: 14 }} />
@@ -104,23 +105,23 @@ export default function TaskCard({ task, onClick }: TaskCardProps) {
         </Tooltip>
       </div>
 
-      {/* Title */}
-      <h4
-        className="text-sm mb-2 leading-snug text-gray-900 dark:text-white group-hover:text-violet-400 transition-colors"
-        style={{
-          display: '-webkit-box',
-          WebkitLineClamp: 2,
-          WebkitBoxOrient: 'vertical',
-          overflow: 'hidden',
-        }}
-      >
-        {task?.title}
-      </h4>
+      <div className="mt-1">
+        <h4
+          className="text-sm font-semibold text-white/90 leading-snug"
+          style={{
+            display: '-webkit-box',
+            WebkitLineClamp: 2,
+            WebkitBoxOrient: 'vertical',
+            overflow: 'hidden',
+          }}
+        >
+          {task?.title}
+        </h4>
+      </div>
 
-      {/* Tags */}
       {tags.length > 0 && (
-        <div className="flex flex-wrap gap-1 mb-2.5">
-          {tags.map(tag => {
+        <div className="flex flex-wrap gap-1 mt-2">
+          {tags.slice(0, 4).map(tag => {
             const style = tagStyles[tag] ?? fallbackTag;
             return (
               <Chip
@@ -132,25 +133,29 @@ export default function TaskCard({ task, onClick }: TaskCardProps) {
                   color: style.color,
                   fontSize: '10px',
                   height: '18px',
-                  borderRadius: '4px',
-                  border: 'none',
-                  '& .MuiChip-label': { px: '6px', py: 0 },
+                  borderRadius: '6px',
+                  '& .MuiChip-label': { px: '7px', py: 0 },
                 }}
               />
             );
           })}
+          {tags.length > 4 && (
+            <span className="text-[10px] text-white/50 px-1.5 py-0.5 rounded-md bg-white/5">
+              +{tags.length - 4}
+            </span>
+          )}
         </div>
       )}
 
-      {/* Footer: assignee + story points + due date */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-1.5">
+      <div className="flex items-center justify-between mt-3">
+        <div className="flex items-center gap-2">
           <Tooltip title={task?.assignee_id ? 'Assigned' : 'Unassigned'} placement="bottom" arrow>
             <Avatar
               sx={{
-                width: 24,
-                height: 24,
-                bgcolor: task?.assignee_id ? '#6d28d9' : '#4b5563',
+                width: 22,
+                height: 22,
+                bgcolor: task?.assignee_id ? 'rgba(167,139,250,0.9)' : 'rgba(255,255,255,0.18)',
+                color: task?.assignee_id ? '#111827' : 'rgba(255,255,255,0.75)',
                 fontSize: 10,
               }}
             >
@@ -159,16 +164,19 @@ export default function TaskCard({ task, onClick }: TaskCardProps) {
           </Tooltip>
 
           {task?.story_points != null && (
-            <span className="text-[10px] bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 rounded px-1.5 py-0.5">
-              {task?.story_points} SP
+            <span className="text-[10px] rounded-md bg-white/8 text-white/70 px-2 py-0.5">
+              {task.story_points} SP
             </span>
           )}
         </div>
 
-        {task?.due_date != null && (
-          <div className="flex items-center gap-1 text-xs" style={{ color: dueDateColor(task?.due_date) }}>
+        {dueStyle && (
+          <div
+            className="flex items-center gap-1 text-[11px] rounded-md px-2 py-0.5"
+            style={{ color: dueStyle.color, background: dueStyle.bg }}
+          >
             <CalendarTodayIcon sx={{ fontSize: 12 }} />
-            <span>{formatDueDate(task?.due_date)}</span>
+            <span>{formatDueDate(due!)}</span>
           </div>
         )}
       </div>

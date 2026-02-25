@@ -1,8 +1,9 @@
 @import "tailwindcss";
 
+/* App base */
 :root {
-  --background: #ffffff;
-  --foreground: #323443;
+  --background: #2f2f44; /* board background */
+  --foreground: #e9e9f2;
 }
 
 @theme inline {
@@ -12,19 +13,43 @@
   --font-mono: var(--font-geist-mono);
 }
 
+/* If you still want automatic light mode later, keep this block.
+   For now, we keep the same palette for consistency. */
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #323443;
-    --foreground: #ededed;
+    --background: #2f2f44;
+    --foreground: #e9e9f2;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
 }
 
+html,
+body {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans), ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial,
+    "Helvetica Neue", "Noto Sans", "Liberation Sans", sans-serif;
+  line-height: 1.35;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* nicer selection */
+::selection {
+  background: rgba(167, 139, 250, 0.35);
+}
+
+/* modal animation (palieku tavo) */
 @keyframes modal-enter {
   from {
     opacity: 0;
