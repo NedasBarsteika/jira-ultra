@@ -179,7 +179,7 @@ function Column({
 }: {
   col: (typeof COLUMNS)[number];
   tasks: TaskRow[];
-  onDropTask: (taskId: string, newStatus: TaskStatus) => void;
+  onDropTask: (taskId: string, newStatus: TaskStatus) => void | Promise<void>;
   children: React.ReactNode;
 }) {
   const dropRef = useRef<HTMLDivElement | null>(null);
