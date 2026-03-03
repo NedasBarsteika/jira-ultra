@@ -79,13 +79,17 @@ export default function NotFound() {
 
   // Trigger glitch every few seconds
   useEffect(() => {
+    let timeoutId: ReturnType<typeof setTimeout>;
     const triggerGlitch = () => {
       setGlitchActive(true);
-      setTimeout(() => setGlitchActive(false), 350);
+      timeoutId = setTimeout(() => setGlitchActive(false), 350);
     };
     triggerGlitch();
     const id = setInterval(triggerGlitch, 4000);
-    return () => clearInterval(id);
+    return () => {
+      clearInterval(id);
+      clearTimeout(timeoutId);
+    };
   }, []);
 
   return (
@@ -209,7 +213,7 @@ export default function NotFound() {
           </h1>
           <p className="text-muted-foreground mb-10 max-w-sm leading-relaxed text-sm">
             The URL you entered doesn&apos;t match any route in Iterova. It may have been moved,
-            deleted, deleted, or perhaps it was never on the sprint backlog to begin with.
+            deleted, or perhaps it was never on the sprint backlog to begin with.
           </p>
 
           {/* Action buttons */}
