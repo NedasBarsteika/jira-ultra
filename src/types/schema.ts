@@ -36,7 +36,7 @@ export const userRole = pgEnum('user_role', ['member', 'leader', 'viewer']);
 
 export const organization = pgTable('organization', {
   organizationId: uuid('organization_id')
-    .default(sql`uuid_generate_v4()`)
+    .default(sql`gen_random_uuid()`)
     .primaryKey()
     .notNull(),
   name: varchar({ length: 255 }).notNull(),
@@ -85,7 +85,7 @@ export const teamMembership = pgTable(
   'team_membership',
   {
     membershipId: uuid('membership_id')
-      .default(sql`uuid_generate_v4()`)
+      .default(sql`gen_random_uuid()`)
       .primaryKey()
       .notNull(),
     teamId: uuid('team_id').notNull(),
@@ -187,7 +187,7 @@ export const team = pgTable(
   'team',
   {
     teamId: uuid('team_id')
-      .default(sql`uuid_generate_v4()`)
+      .default(sql`gen_random_uuid()`)
       .primaryKey()
       .notNull(),
     organizationId: uuid('organization_id').notNull(),
@@ -219,7 +219,7 @@ export const project = pgTable(
   'project',
   {
     projectId: uuid('project_id')
-      .default(sql`uuid_generate_v4()`)
+      .default(sql`gen_random_uuid()`)
       .primaryKey()
       .notNull(),
     organizationId: uuid('organization_id').notNull(),
@@ -263,7 +263,7 @@ export const sprint = pgTable(
   'sprint',
   {
     sprintId: uuid('sprint_id')
-      .default(sql`uuid_generate_v4()`)
+      .default(sql`gen_random_uuid()`)
       .primaryKey()
       .notNull(),
     projectId: uuid('project_id').notNull(),
@@ -295,7 +295,7 @@ export const backlog = pgTable(
   'backlog',
   {
     backlogId: uuid('backlog_id')
-      .default(sql`uuid_generate_v4()`)
+      .default(sql`gen_random_uuid()`)
       .primaryKey()
       .notNull(),
     projectId: uuid('project_id').notNull(),
@@ -321,7 +321,7 @@ export const task = pgTable(
   'task',
   {
     taskId: uuid('task_id')
-      .default(sql`uuid_generate_v4()`)
+      .default(sql`gen_random_uuid()`)
       .primaryKey()
       .notNull(),
     projectId: uuid('project_id').notNull(),
@@ -381,7 +381,7 @@ export const pokerVote = pgTable(
   'poker_vote',
   {
     voteId: uuid('vote_id')
-      .default(sql`uuid_generate_v4()`)
+      .default(sql`gen_random_uuid()`)
       .primaryKey()
       .notNull(),
     sessionId: uuid('session_id').notNull(),
@@ -414,7 +414,7 @@ export const pokerSession = pgTable(
   'poker_session',
   {
     sessionId: uuid('session_id')
-      .default(sql`uuid_generate_v4()`)
+      .default(sql`gen_random_uuid()`)
       .primaryKey()
       .notNull(),
     sprintId: uuid('sprint_id').notNull(),
@@ -453,7 +453,7 @@ export const sprintAvailability = pgTable(
   'sprint_availability',
   {
     availabilityId: uuid('availability_id')
-      .default(sql`uuid_generate_v4()`)
+      .default(sql`gen_random_uuid()`)
       .primaryKey()
       .notNull(),
     sprintId: uuid('sprint_id').notNull(),
@@ -506,7 +506,7 @@ export const userAnalytics = pgTable(
   'user_analytics',
   {
     analyticsId: uuid('analytics_id')
-      .default(sql`uuid_generate_v4()`)
+      .default(sql`gen_random_uuid()`)
       .primaryKey()
       .notNull(),
     userId: text('user_id').notNull(),
@@ -548,7 +548,7 @@ export const sprintMetrics = pgTable(
   'sprint_metrics',
   {
     metricsId: uuid('metrics_id')
-      .default(sql`uuid_generate_v4()`)
+      .default(sql`gen_random_uuid()`)
       .primaryKey()
       .notNull(),
     sprintId: uuid('sprint_id').notNull(),
@@ -584,7 +584,7 @@ export const velocityData = pgTable(
   'velocity_data',
   {
     velocityId: uuid('velocity_id')
-      .default(sql`uuid_generate_v4()`)
+      .default(sql`gen_random_uuid()`)
       .primaryKey()
       .notNull(),
     metricsId: uuid('metrics_id').notNull(),
@@ -617,7 +617,7 @@ export const burndownData = pgTable(
   'burndown_data',
   {
     burndownId: uuid('burndown_id')
-      .default(sql`uuid_generate_v4()`)
+      .default(sql`gen_random_uuid()`)
       .primaryKey()
       .notNull(),
     metricsId: uuid('metrics_id').notNull(),

@@ -8,7 +8,7 @@ CREATE TYPE "public"."task_type" AS ENUM('epic', 'story', 'task', 'bug', 'spike'
 CREATE TYPE "public"."team_role" AS ENUM('admin', 'member', 'viewer');--> statement-breakpoint
 CREATE TYPE "public"."user_role" AS ENUM('member', 'leader', 'viewer');--> statement-breakpoint
 CREATE TABLE "organization" (
-	"organization_id" uuid PRIMARY KEY DEFAULT uuid_generate_v4() NOT NULL,
+	"organization_id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"name" varchar(255) NOT NULL,
 	"subscription_tier" "subscription_tier" DEFAULT 'free' NOT NULL,
 	"created_at" timestamp DEFAULT CURRENT_TIMESTAMP NOT NULL,
@@ -34,7 +34,7 @@ CREATE TABLE "user" (
 );
 --> statement-breakpoint
 CREATE TABLE "team_membership" (
-	"membership_id" uuid PRIMARY KEY DEFAULT uuid_generate_v4() NOT NULL,
+	"membership_id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"team_id" uuid NOT NULL,
 	"user_id" text NOT NULL,
 	"role_in_team" "team_role" DEFAULT 'member' NOT NULL,
@@ -82,7 +82,7 @@ CREATE TABLE "verification" (
 );
 --> statement-breakpoint
 CREATE TABLE "team" (
-	"team_id" uuid PRIMARY KEY DEFAULT uuid_generate_v4() NOT NULL,
+	"team_id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"organization_id" uuid NOT NULL,
 	"name" varchar(255) NOT NULL,
 	"lead_user_id" text,
@@ -92,7 +92,7 @@ CREATE TABLE "team" (
 );
 --> statement-breakpoint
 CREATE TABLE "project" (
-	"project_id" uuid PRIMARY KEY DEFAULT uuid_generate_v4() NOT NULL,
+	"project_id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"organization_id" uuid NOT NULL,
 	"team_id" uuid,
 	"name" varchar(255) NOT NULL,
@@ -109,7 +109,7 @@ CREATE TABLE "project" (
 );
 --> statement-breakpoint
 CREATE TABLE "sprint" (
-	"sprint_id" uuid PRIMARY KEY DEFAULT uuid_generate_v4() NOT NULL,
+	"sprint_id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"project_id" uuid NOT NULL,
 	"name" varchar(255) NOT NULL,
 	"start_date" date NOT NULL,
@@ -124,7 +124,7 @@ CREATE TABLE "sprint" (
 );
 --> statement-breakpoint
 CREATE TABLE "backlog" (
-	"backlog_id" uuid PRIMARY KEY DEFAULT uuid_generate_v4() NOT NULL,
+	"backlog_id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"project_id" uuid NOT NULL,
 	"name" varchar(255) NOT NULL,
 	"created_at" timestamp DEFAULT CURRENT_TIMESTAMP NOT NULL,
@@ -133,7 +133,7 @@ CREATE TABLE "backlog" (
 );
 --> statement-breakpoint
 CREATE TABLE "task" (
-	"task_id" uuid PRIMARY KEY DEFAULT uuid_generate_v4() NOT NULL,
+	"task_id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"project_id" uuid NOT NULL,
 	"sprint_id" uuid,
 	"backlog_id" uuid,
@@ -156,7 +156,7 @@ CREATE TABLE "task" (
 );
 --> statement-breakpoint
 CREATE TABLE "poker_vote" (
-	"vote_id" uuid PRIMARY KEY DEFAULT uuid_generate_v4() NOT NULL,
+	"vote_id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"session_id" uuid NOT NULL,
 	"user_id" text NOT NULL,
 	"vote_value" integer NOT NULL,
@@ -167,7 +167,7 @@ CREATE TABLE "poker_vote" (
 );
 --> statement-breakpoint
 CREATE TABLE "poker_session" (
-	"session_id" uuid PRIMARY KEY DEFAULT uuid_generate_v4() NOT NULL,
+	"session_id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"sprint_id" uuid NOT NULL,
 	"task_id" uuid NOT NULL,
 	"created_by" text NOT NULL,
@@ -179,7 +179,7 @@ CREATE TABLE "poker_session" (
 );
 --> statement-breakpoint
 CREATE TABLE "sprint_availability" (
-	"availability_id" uuid PRIMARY KEY DEFAULT uuid_generate_v4() NOT NULL,
+	"availability_id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"sprint_id" uuid NOT NULL,
 	"user_id" text NOT NULL,
 	"submitted_by" text NOT NULL,
@@ -200,7 +200,7 @@ CREATE TABLE "sprint_availability" (
 );
 --> statement-breakpoint
 CREATE TABLE "user_analytics" (
-	"analytics_id" uuid PRIMARY KEY DEFAULT uuid_generate_v4() NOT NULL,
+	"analytics_id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"user_id" text NOT NULL,
 	"sprint_id" uuid NOT NULL,
 	"stories_completed" integer DEFAULT 0 NOT NULL,
@@ -220,7 +220,7 @@ END) STORED,
 );
 --> statement-breakpoint
 CREATE TABLE "sprint_metrics" (
-	"metrics_id" uuid PRIMARY KEY DEFAULT uuid_generate_v4() NOT NULL,
+	"metrics_id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"sprint_id" uuid NOT NULL,
 	"total_tasks" integer DEFAULT 0 NOT NULL,
 	"completed_tasks" integer DEFAULT 0 NOT NULL,
@@ -238,7 +238,7 @@ END) STORED,
 );
 --> statement-breakpoint
 CREATE TABLE "velocity_data" (
-	"velocity_id" uuid PRIMARY KEY DEFAULT uuid_generate_v4() NOT NULL,
+	"velocity_id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"metrics_id" uuid NOT NULL,
 	"sprint_number" integer NOT NULL,
 	"committed_points" integer NOT NULL,
@@ -254,7 +254,7 @@ END) STORED,
 );
 --> statement-breakpoint
 CREATE TABLE "burndown_data" (
-	"burndown_id" uuid PRIMARY KEY DEFAULT uuid_generate_v4() NOT NULL,
+	"burndown_id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"metrics_id" uuid NOT NULL,
 	"entry_date" date NOT NULL,
 	"remaining_points" integer NOT NULL,
