@@ -3,8 +3,7 @@
 import { and, eq, isNull, sql } from 'drizzle-orm';
 
 import { db } from '@/lib/db';
-
-import { project, task } from '../../../database/schema';
+import { task, project } from '@/types/schema';
 
 export type TaskRow = typeof task.$inferSelect;
 export type NewTask = typeof task.$inferInsert;

@@ -45,7 +45,11 @@ Run `npm run db:studio` (in a separate terminal if u want) and follow the link h
 To have the init migration applied:
 
 1. Go to SQL console tab.
-2. run these two sql commands:
+2. Run these three sql commands:
+
+```
+CREATE SCHEMA IF NOT EXISTS drizzle;
+```
 
 ```
 CREATE TABLE IF NOT EXISTS drizzle.__drizzle_migrations (
@@ -64,12 +68,12 @@ Now drizzle knows that the init migration is applied. You will not going to need
 
 ### New migrations
 
-Database schema is written in `database\schema.ts`.<br/>
-In this file TypeScript types and database tables are writen.
+Database schema is written in `src\types\schema.ts`.<br/>
+In this file TypeScript types and database tables are written.
 
 If u want to edit DB tables:
 
-1. edit `\database\schema.ts` file
+1. edit `src\types\schema.ts` file manually
 2. run in terminal `npm run db:generate -- example_name_of_migration`. This will generate migration in `\drizzle` folder
 3. run in terminal `npm run db:migrate` to apply migration or just run the project `npm run dev`, it will also apply migrations
 

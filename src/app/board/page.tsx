@@ -8,8 +8,7 @@ import TaskModal from '@/components/modals-and-forms/tasks/TaskModal';
 import CustomButton from '@/components/utils/buttons/CustomButton';
 import TaskCard from '@/components/utils/card/Card';
 import { getTasks, updateTask } from '@/server/tasks/tasks';
-import type { TaskRow } from '@/server/tasks/tasks';
-import type { TaskPriority, TaskStatus } from '@/types/db';
+import type { TaskPriority, TaskRow, TaskStatus } from '@/server/tasks/tasks';
 
 const PLACEHOLDER_PROJECT_ID = 'a0000000-0000-0000-0000-000000000001';
 
@@ -26,7 +25,7 @@ const COLUMNS: Array<{ key: string; label: string; value: TaskStatus; dotClass: 
 type DragItem = { taskId: string };
 
 function sumStoryPoints(tasks: TaskRow[]) {
-  return tasks.reduce((acc, t) => acc + (t.story_points ?? 0), 0);
+  return tasks.reduce((acc, t) => acc + (t.storyPoints ?? 0), 0);
 }
 
 // Custom dropdown instead of native <select> to ensure proper contrast and styling
@@ -196,10 +195,12 @@ function Column({
         canDrop: monitor.canDrop(),
       }),
     }),
-    [col.value, onDropTask],
+    [col.value, onDropTask]
   );
 
-  drop(dropRef);
+  useEffect(() => {
+    drop(dropRef);
+  }, [drop]);
 
   const pts = sumStoryPoints(tasks);
 
@@ -248,17 +249,19 @@ function DraggableTask({
   const [{ isDragging }, drag] = useDrag(
     () => ({
       type: DND_ITEM_TYPE,
-      item: { taskId: task.task_id } satisfies DragItem,
+      item: { taskId: task.taskId } satisfies DragItem,
       canDrag: !dragDisabled,
       collect: monitor => ({ isDragging: monitor.isDragging() }),
       end: () => {
         dragEndTimeRef.current = Date.now();
       },
     }),
-    [task.task_id, dragDisabled],
+    [task.taskId, dragDisabled]
   );
 
-  drag(ref);
+  useEffect(() => {
+    drag(ref);
+  }, [drag]);
 
   const handleClick = () => {
     const timeSinceDragEnd = Date.now() - dragEndTimeRef.current;
@@ -300,6 +303,7 @@ export default function BoardsPage() {
   const [tasks, setTasks] = useState<TaskRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [saving, setSaving] = useState(0);
 
   const [query, setQuery] = useState('');
@@ -328,7 +332,7 @@ export default function BoardsPage() {
 
     const statusMap: Record<string, TaskStatus> = {};
     data.forEach(t => {
-      statusMap[t.task_id] = t.status;
+      statusMap[t.taskId] = t.status;
     });
     lastConfirmedStatusRef.current = statusMap;
   }, []);
@@ -360,7 +364,7 @@ export default function BoardsPage() {
       const matchesQuery =
         q.length === 0 ||
         (t.title ?? '').toLowerCase().includes(q) ||
-        (t.task_key ?? '').toLowerCase().includes(q);
+        (t.taskKey ?? '').toLowerCase().includes(q);
 
       const matchesPriority = priorityFilter === 'all' ? true : t.priority === priorityFilter;
 
@@ -369,18 +373,18 @@ export default function BoardsPage() {
   }, [tasks, query, priorityFilter]);
 
   const tasksByStatus = useMemo(() => {
-    const map = new Map<TaskStatus | string, TaskRow[]>();
+    const map = new Map<TaskStatus, TaskRow[]>();
     COLUMNS.forEach(c => map.set(c.value, []));
 
     // Create fallback for unexpected statuses
-    const FALLBACK_STATUS = '__fallback__';
+    const FALLBACK_STATUS = '__fallback__' as TaskStatus;
     map.set(FALLBACK_STATUS, []);
 
     for (const t of filteredTasks) {
       const arr = map.get(t.status);
       if (arr) arr.push(t);
       else {
-        console.warn(`Unexpected task status: task_id=${t.task_id}, status=${t.status}`);
+        console.warn(`Unexpected task status: task_id=${t.taskId}, status=${t.status}`);
         map.get(FALLBACK_STATUS)?.push(t);
       }
     }
@@ -423,7 +427,7 @@ export default function BoardsPage() {
       }
 
       const snapshot = tasksRef.current;
-      const current = snapshot.find(t => t.task_id === taskId);
+      const current = snapshot.find(t => t.taskId === taskId);
       if (!current) return;
       if (current.status === newStatus) return;
 
@@ -434,9 +438,7 @@ export default function BoardsPage() {
       const confirmedStatus = lastConfirmedStatusRef.current[taskId] ?? current.status;
 
       // Optimistic update
-      setTasks(prev =>
-        prev.map(t => (t.task_id === taskId ? { ...t, status: newStatus } : t)),
-      );
+      setTasks(prev => prev.map(t => (t.taskId === taskId ? { ...t, status: newStatus } : t)));
 
       pendingSavesRef.current += 1;
       setSaving(n => n + 1);
@@ -454,7 +456,7 @@ export default function BoardsPage() {
         setError('Failed to update task.');
         // Rollback to last confirmed
         setTasks(prev =>
-          prev.map(t => (t.task_id === taskId ? { ...t, status: confirmedStatus } : t)),
+          prev.map(t => (t.taskId === taskId ? { ...t, status: confirmedStatus } : t))
         );
       } finally {
         // Unlock
@@ -479,7 +481,7 @@ export default function BoardsPage() {
         }
       }
     },
-    [applyServerTasks, setTaskInFlight],
+    [applyServerTasks, setTaskInFlight]
   );
 
   return (
@@ -536,7 +538,7 @@ export default function BoardsPage() {
         </div>
 
         {error && <p className="mt-3 text-sm text-red-300">{error}</p>}
-        {saving > 0 && <p className="mt-1 text-xs text-white/50">Saving…</p>}
+        {/* {saving > 0 && <p className="mt-1 text-xs text-white/50">Saving…</p>} */}
 
         <div className="mt-6">
           {loading ? (
@@ -546,15 +548,20 @@ export default function BoardsPage() {
               {COLUMNS.map(col => {
                 const colTasks = tasksByStatus.get(col.value) ?? [];
                 return (
-                  <Column key={col.key} col={col} tasks={colTasks} onDropTask={handleDropTask}>
+                  <Column
+                    key={col.key}
+                    col={col}
+                    tasks={colTasks}
+                    onDropTask={(taskId, status) => void handleDropTask(taskId, status)}
+                  >
                     {colTasks.length === 0 ? (
                       <div className="text-xs text-white/40 px-1 py-2">Drop tasks here</div>
                     ) : (
                       colTasks.map(task => (
                         <DraggableTask
-                          key={task.task_id}
+                          key={task.taskId}
                           task={task}
-                          dragDisabled={!!taskInFlightState[task.task_id]}
+                          dragDisabled={!!taskInFlightState[task.taskId]}
                           onClick={t => {
                             setSelectedTask(t);
                             setModalOpen(true);
