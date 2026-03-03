@@ -44,8 +44,9 @@ Run `npm run db:studio` (in a separate terminal if u want) and follow the link h
 
 To have the init migration applied:
 
-1. Go to SQL console tab.
-2. Run these three sql commands:
+1. Open drizzle studio.
+2. Go to SQL console tab.
+3. Run these three sql commands:
 
 ```
 CREATE SCHEMA IF NOT EXISTS drizzle;
