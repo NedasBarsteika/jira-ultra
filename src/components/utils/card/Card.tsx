@@ -50,7 +50,9 @@ function formatDueDate(date: Date | string): string {
   const now = new Date();
   const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
   const startOfDueDate = new Date(d.getFullYear(), d.getMonth(), d.getDate());
-  const diff = Math.round((startOfDueDate.getTime() - startOfToday.getTime()) / (1000 * 60 * 60 * 24));
+  const diff = Math.round(
+    (startOfDueDate.getTime() - startOfToday.getTime()) / (1000 * 60 * 60 * 24)
+  );
 
   if (diff < 0) return 'Overdue';
   if (diff === 0) return 'Today';
@@ -63,8 +65,10 @@ function dueDateTone(date: Date | string): { color: string; bg: string } {
   const now = new Date();
   const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
   const startOfDueDate = new Date(d.getFullYear(), d.getMonth(), d.getDate());
-  const diffDays = Math.round((startOfDueDate.getTime() - startOfToday.getTime()) / (1000 * 60 * 60 * 24));
-  
+  const diffDays = Math.round(
+    (startOfDueDate.getTime() - startOfToday.getTime()) / (1000 * 60 * 60 * 24)
+  );
+
   if (diffDays < 0) return { color: '#fca5a5', bg: 'rgba(248,113,113,0.12)' };
   if (diffDays <= 2) return { color: '#fcd34d', bg: 'rgba(251,191,36,0.12)' };
   return { color: 'rgba(255,255,255,0.70)', bg: 'rgba(255,255,255,0.08)' };
@@ -77,15 +81,18 @@ interface TaskCardProps {
 
 export default function TaskCard({ task, onClick }: TaskCardProps) {
   const priority = (task?.priority ?? 'medium') as Priority;
-  const { icon: PriorityIcon, label: priorityLabel, color: priorityColor } =
-    priorityConfig[priority] ?? priorityConfig.medium;
+  const {
+    icon: PriorityIcon,
+    label: priorityLabel,
+    color: priorityColor,
+  } = priorityConfig[priority] ?? priorityConfig.medium;
 
   const tags = task?.tags ?? [];
 
   const due = task?.due_date;
   const dueStyle = due ? dueDateTone(due) : null;
 
-  const rawKey = (task?.task_key ?? '-') as string;
+  const rawKey = task?.task_key ?? '-';
   const cleanKey = rawKey.replace(/^[\s⋮⠿]+/g, ''); // Remove leading decorative characters
 
   const handleCardKeyDown = (e: React.KeyboardEvent) => {

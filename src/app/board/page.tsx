@@ -180,7 +180,7 @@ function Column({
 }: {
   col: (typeof COLUMNS)[number];
   tasks: TaskRow[];
-  onDropTask: (taskId: string, newStatus: TaskStatus) => void;
+  onDropTask: (taskId: string, newStatus: TaskStatus) => void | Promise<void>;
   children: React.ReactNode;
 }) {
   const dropRef = useRef<HTMLDivElement | null>(null);
@@ -196,10 +196,12 @@ function Column({
         canDrop: monitor.canDrop(),
       }),
     }),
-    [col.value, onDropTask],
+    [col.value, onDropTask]
   );
 
-  drop(dropRef);
+  useEffect(() => {
+    drop(dropRef);
+  }, [drop]);
 
   const pts = sumStoryPoints(tasks);
 
@@ -255,10 +257,12 @@ function DraggableTask({
         dragEndTimeRef.current = Date.now();
       },
     }),
-    [task.task_id, dragDisabled],
+    [task.task_id, dragDisabled]
   );
 
-  drag(ref);
+  useEffect(() => {
+    drag(ref);
+  }, [drag]);
 
   const handleClick = () => {
     const timeSinceDragEnd = Date.now() - dragEndTimeRef.current;
@@ -369,7 +373,7 @@ export default function BoardsPage() {
   }, [tasks, query, priorityFilter]);
 
   const tasksByStatus = useMemo(() => {
-    const map = new Map<TaskStatus | string, TaskRow[]>();
+    const map = new Map<string, TaskRow[]>();
     COLUMNS.forEach(c => map.set(c.value, []));
 
     // Create fallback for unexpected statuses
@@ -434,9 +438,7 @@ export default function BoardsPage() {
       const confirmedStatus = lastConfirmedStatusRef.current[taskId] ?? current.status;
 
       // Optimistic update
-      setTasks(prev =>
-        prev.map(t => (t.task_id === taskId ? { ...t, status: newStatus } : t)),
-      );
+      setTasks(prev => prev.map(t => (t.task_id === taskId ? { ...t, status: newStatus } : t)));
 
       pendingSavesRef.current += 1;
       setSaving(n => n + 1);
@@ -454,7 +456,7 @@ export default function BoardsPage() {
         setError('Failed to update task.');
         // Rollback to last confirmed
         setTasks(prev =>
-          prev.map(t => (t.task_id === taskId ? { ...t, status: confirmedStatus } : t)),
+          prev.map(t => (t.task_id === taskId ? { ...t, status: confirmedStatus } : t))
         );
       } finally {
         // Unlock
@@ -479,7 +481,7 @@ export default function BoardsPage() {
         }
       }
     },
-    [applyServerTasks, setTaskInFlight],
+    [applyServerTasks, setTaskInFlight]
   );
 
   return (

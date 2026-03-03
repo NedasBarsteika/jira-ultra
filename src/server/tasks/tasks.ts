@@ -30,10 +30,14 @@ export async function getTasks(filters?: {
   if (!db) throw new Error('Database connection not initialized');
   let query = db.selectFrom(Tables.task).selectAll().where(Task.deleted_at, 'is', null);
 
-  if (filters?.projectId != null && filters.projectId !== '') query = query.where(Task.project_id, '=', filters.projectId);
-  if (filters?.sprintId != null && filters.sprintId !== '') query = query.where(Task.sprint_id, '=', filters.sprintId);
-  if (filters?.backlogId != null && filters.backlogId !== '') query = query.where(Task.backlog_id, '=', filters.backlogId);
-  if (filters?.assigneeId != null && filters.assigneeId !== '') query = query.where(Task.assignee_id, '=', filters.assigneeId);
+  if (filters?.projectId != null && filters.projectId !== '')
+    query = query.where(Task.project_id, '=', filters.projectId);
+  if (filters?.sprintId != null && filters.sprintId !== '')
+    query = query.where(Task.sprint_id, '=', filters.sprintId);
+  if (filters?.backlogId != null && filters.backlogId !== '')
+    query = query.where(Task.backlog_id, '=', filters.backlogId);
+  if (filters?.assigneeId != null && filters.assigneeId !== '')
+    query = query.where(Task.assignee_id, '=', filters.assigneeId);
   if (filters?.status != null) query = query.where(Task.status, '=', filters.status);
 
   return query.execute();

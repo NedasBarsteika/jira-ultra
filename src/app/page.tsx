@@ -1,16 +1,10 @@
-import { headers } from 'next/headers';
 import Image from 'next/image';
 import Link from 'next/link';
 
 import CustomButton from '@/components/utils/buttons/CustomButton';
-import SignOutButton from '@/components/utils/buttons/SignOutButton';
 import CustomImage from '@/components/utils/images/Image';
-import { auth } from '@/lib/better-auth/auth';
 
-export default async function Home() {
-  const session = await auth.api.getSession({
-    headers: await headers(),
-  });
+export default function Home() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-background font-sans">
       <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-background sm:items-start">
@@ -70,22 +64,6 @@ export default async function Home() {
           </a>
         </div>
         <CustomImage src="/images/art.png" alt="Photo" width={400} height={300} rounded="md" />
-        {!session && (
-          <>
-            <Link href="/signin">
-              <CustomButton>Login page</CustomButton>
-            </Link>
-            <Link href="/signup">
-              <CustomButton>Sign up page</CustomButton>
-            </Link>
-          </>
-        )}
-        {session && (
-          <>
-            <h1>User ID:{session.user.id}</h1>
-            <SignOutButton />
-          </>
-        )}
         <Link href="/examples">
           <CustomButton>Examples page</CustomButton>
         </Link>
