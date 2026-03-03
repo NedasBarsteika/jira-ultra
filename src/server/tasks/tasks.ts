@@ -1,23 +1,26 @@
 'use server';
 
-import type { Insertable, Selectable, Updateable } from 'kysely';
+import { and, eq, isNull, sql } from 'drizzle-orm';
 
 import { db } from '@/lib/db';
-import type { Task as TaskType, TaskStatus } from '@/types/db';
-import { Tables, Task, Project } from '@/types/db-meta';
 
-export type TaskRow = Selectable<TaskType>;
-export type NewTask = Insertable<TaskType>;
-export type TaskUpdate = Updateable<TaskType>;
+import { project, task } from '../../../database/schema';
+
+export type TaskRow = typeof task.$inferSelect;
+export type NewTask = typeof task.$inferInsert;
+export type TaskUpdate = Partial<NewTask>;
+export type TaskStatus = TaskRow['status'];
+export type TaskPriority = TaskRow['priority'];
 
 export async function getTask(id: string): Promise<TaskRow | undefined> {
   if (!db) throw new Error('Database connection not initialized');
-  return db
-    .selectFrom(Tables.task)
-    .selectAll()
-    .where(Task.task_id, '=', id)
-    .where(Task.deleted_at, 'is', null)
-    .executeTakeFirst();
+  const result = await db
+    .select()
+    .from(task)
+    .where(and(eq(task.taskId, id), isNull(task.deletedAt)))
+    .limit(1);
+
+  return result[0];
 }
 
 export async function getTasks(filters?: {
@@ -28,33 +31,38 @@ export async function getTasks(filters?: {
   status?: TaskStatus;
 }): Promise<TaskRow[]> {
   if (!db) throw new Error('Database connection not initialized');
-  let query = db.selectFrom(Tables.task).selectAll().where(Task.deleted_at, 'is', null);
+  const conditions = [isNull(task.deletedAt)];
 
-  if (filters?.projectId != null && filters.projectId !== '') query = query.where(Task.project_id, '=', filters.projectId);
-  if (filters?.sprintId != null && filters.sprintId !== '') query = query.where(Task.sprint_id, '=', filters.sprintId);
-  if (filters?.backlogId != null && filters.backlogId !== '') query = query.where(Task.backlog_id, '=', filters.backlogId);
-  if (filters?.assigneeId != null && filters.assigneeId !== '') query = query.where(Task.assignee_id, '=', filters.assigneeId);
-  if (filters?.status != null) query = query.where(Task.status, '=', filters.status);
+  if (filters?.projectId) conditions.push(eq(task.projectId, filters.projectId));
+  if (filters?.sprintId) conditions.push(eq(task.sprintId, filters.sprintId));
+  if (filters?.backlogId) conditions.push(eq(task.backlogId, filters.backlogId));
+  if (filters?.assigneeId) conditions.push(eq(task.assigneeId, filters.assigneeId));
+  if (filters?.status) conditions.push(eq(task.status, filters.status));
 
-  return query.execute();
+  return db
+    .select()
+    .from(task)
+    .where(and(...conditions));
 }
 
-export async function createTask(input: Omit<NewTask, typeof Task.task_key>): Promise<TaskRow> {
+export async function createTask(input: Omit<NewTask, 'taskKey'>): Promise<TaskRow> {
   if (!db) throw new Error('Database connection not initialized');
+  return db.transaction(async trx => {
+    const [updatedProject] = await trx
+      .update(project)
+      .set({ taskCounter: sql`${project.taskCounter} + 1` })
+      .where(eq(project.projectId, input.projectId))
+      .returning({ key: project.key, taskCounter: project.taskCounter });
 
-  return db.transaction().execute(async trx => {
-    const project = await trx
-      .updateTable(Tables.project)
-      .set(eb => ({ [Project.task_counter]: eb(Project.task_counter, '+', 1) }))
-      .where(Project.project_id, '=', input.project_id)
-      .returning([Project.key, Project.task_counter])
-      .executeTakeFirstOrThrow();
+    if (!updatedProject) throw new Error('Project not found');
 
-    return trx
-      .insertInto(Tables.task)
-      .values({ ...input, [Task.task_key]: `${project.key}-${project.task_counter}` })
-      .returningAll()
-      .executeTakeFirstOrThrow();
+    const [newTask] = await trx
+      .insert(task)
+      .values({ ...input, taskKey: `${updatedProject.key}-${updatedProject.taskCounter}` })
+      .returning();
+
+    if (!newTask) throw new Error('Failed to create task');
+    return newTask;
   });
 }
 
@@ -62,22 +70,21 @@ type SafeTaskUpdate = Omit<TaskUpdate, 'task_id' | 'task_key' | 'created_at' | '
 
 export async function updateTask(id: string, input: SafeTaskUpdate): Promise<TaskRow | undefined> {
   if (!db) throw new Error('Database connection not initialized');
-  return db
-    .updateTable(Tables.task)
+  const [updated] = await db
+    .update(task)
     .set(input)
-    .where(Task.task_id, '=', id)
-    .where(Task.deleted_at, 'is', null)
-    .returningAll()
-    .executeTakeFirst();
+    .where(and(eq(task.taskId, id), isNull(task.deletedAt)))
+    .returning();
+
+  return updated;
 }
 
 export async function deleteTask(id: string): Promise<TaskRow | undefined> {
-  if (!db) throw new Error('Database connection not initialized');
-  return db
-    .updateTable(Tables.task)
-    .set({ deleted_at: new Date() })
-    .where(Task.task_id, '=', id)
-    .where(Task.deleted_at, 'is', null)
-    .returningAll()
-    .executeTakeFirst();
+  const [deleted] = await db
+    .update(task)
+    .set({ deletedAt: new Date().toISOString() })
+    .where(and(eq(task.taskId, id), isNull(task.deletedAt)))
+    .returning();
+
+  return deleted;
 }

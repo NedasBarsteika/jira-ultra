@@ -331,7 +331,7 @@ export const task = pgTable(
     reporterId: text('reporter_id').notNull(),
     title: varchar({ length: 500 }).notNull(),
     description: text(),
-    estimatedHours: integer('estimated_hours'),
+    estimatedHours: numeric('estimated_hours', { precision: 10, scale: 2 }),
     status: taskStatus().default('to_do').notNull(),
     priority: taskPriority().default('medium').notNull(),
     taskType: taskType('task_type').default('task').notNull(),
