@@ -1,17 +1,13 @@
-import { Kysely, PostgresDialect } from 'kysely';
+import { drizzle } from 'drizzle-orm/node-postgres';
 import { Pool } from 'pg';
 
-import type { DB } from '@/types/db';
-
-const connectionString = process.env.DATABASE_URL;
-if (!connectionString) {
+if (!process.env.DATABASE_URL) {
   throw new Error('DATABASE_URL environment variable is not set');
 }
 
 const pool = new Pool({
-  connectionString,
+  connectionString: process.env.DATABASE_URL,
+  max: 3,
+  connectionTimeoutMillis: 2000,
 });
-
-export const db = new Kysely<DB>({
-  dialect: new PostgresDialect({ pool }),
-});
+export const db = drizzle(pool);

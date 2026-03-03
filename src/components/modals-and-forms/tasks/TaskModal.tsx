@@ -67,12 +67,12 @@ function taskToForm(task: TaskRow): FormState {
     title: task?.title,
     description: task?.description ?? '',
     priority: task?.priority ?? 'medium',
-    task_type: task?.task_type ?? 'task',
-    story_points: task?.story_points?.toString() ?? '',
+    task_type: task?.taskType ?? 'task',
+    story_points: task?.storyPoints?.toString() ?? '',
     tags: task?.tags ?? [],
-    due_date: task?.due_date ? new Date(task?.due_date as unknown as string) : null,
-    assignee_id: task?.assignee_id ?? '',
-    estimated_hours: task?.estimated_hours?.toString() ?? '',
+    due_date: task?.dueDate ? new Date(task?.dueDate as unknown as string) : null,
+    assignee_id: task?.assigneeId ?? '',
+    estimated_hours: task?.estimatedHours?.toString() ?? '',
   };
 }
 
@@ -169,22 +169,22 @@ export default function TaskModal({ open, onClose, task, projectId, onSuccess }:
       setLoading(true);
 
       try {
-        const editableFields = {
+        const editableFields: Partial<TaskRow> = {
           title: validated?.title,
           description: validated?.description?.trim() || null,
           priority: validated?.priority,
-          task_type: validated?.task_type,
-          story_points: validated?.story_points ? parseInt(validated?.story_points, 10) : null,
+          taskType: validated?.task_type,
+          storyPoints: validated?.story_points ? parseInt(validated?.story_points, 10) : null,
           tags: (form?.tags?.length ?? 0) > 0 ? form?.tags : null,
-          due_date: form?.due_date ?? null,
-          assignee_id: form?.assignee_id || null,
-          estimated_hours: validated?.estimated_hours
-            ? parseFloat(validated?.estimated_hours)
+          dueDate: form?.due_date?.toISOString().split('T')[0] ?? null,
+          assigneeId: form?.assignee_id || null,
+          estimatedHours: validated?.estimated_hours
+            ? parseFloat(validated?.estimated_hours).toString()
             : null,
         };
 
         if (isUpdate) {
-          await updateTask(task?.task_id, editableFields);
+          await updateTask(task?.taskId, editableFields);
           toast.success('Task updated successfully');
         } else {
           if (!projectId) {
@@ -192,11 +192,12 @@ export default function TaskModal({ open, onClose, task, projectId, onSuccess }:
             return;
           }
           await createTask({
-            project_id: projectId,
+            projectId: projectId,
             ...editableFields,
-            reporter_id: PLACEHOLDER_REPORTER_ID,
-            sprint_id: PLACEHOLDER_SPRINT_ID,
-            backlog_id: PLACEHOLDER_BACKLOG_ID,
+            title: validated?.title,
+            reporterId: PLACEHOLDER_REPORTER_ID,
+            sprintId: PLACEHOLDER_SPRINT_ID,
+            backlogId: PLACEHOLDER_BACKLOG_ID,
           });
           toast.success('Task created successfully');
         }
@@ -227,10 +228,10 @@ export default function TaskModal({ open, onClose, task, projectId, onSuccess }:
   }
 
   async function handleDelete() {
-    if (!task?.task_id) return;
+    if (!task || !task?.taskId) return;
     setDeleting(true);
     try {
-      await deleteTask(task?.task_id);
+      await deleteTask(task?.taskId);
       toast.success('Task deleted');
       onSuccess?.();
       onClose();
