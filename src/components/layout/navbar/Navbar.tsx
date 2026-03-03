@@ -3,6 +3,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 
 import AuthButtons from '@/components/layout/navbar/AuthButtons';
+import NavLinks from '@/components/layout/navbar/NavLinks';
 import SignOutButton from '@/components/utils/buttons/SignOutButton';
 import { auth } from '@/lib/better-auth/auth';
 
@@ -26,6 +27,7 @@ export default async function Navbar() {
         </Link>
 
         <div className="flex items-center gap-4">
+          <NavLinks />
           {!session ? (
             <AuthButtons />
           ) : (
