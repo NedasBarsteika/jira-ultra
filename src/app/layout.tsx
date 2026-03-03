@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
 
 import './globals.css';
+import Navbar from '@/components/layout/navbar/Navbar';
 import MuiProvider from '@/components/providers/MuiProvider';
 import ToastProvider from '@/components/utils/toast/ToastProvider';
 
@@ -29,7 +30,10 @@ export default function RootLayout({
     <html lang="en">
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         <MuiProvider>
-          <ToastProvider>{children}</ToastProvider>
+          <ToastProvider>
+            <Navbar />
+            {children}
+          </ToastProvider>
         </MuiProvider>
       </body>
     </html>
