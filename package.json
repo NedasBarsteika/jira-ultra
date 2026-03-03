@@ -9,7 +9,7 @@
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "db:codegen": "node --env-file=.env.development scripts/codegen-runner.mjs",
-    "db:generate": "drizzle-kit --env-file=.env.development generate",
+    "db:generate": "dotenv -e .env.development -- drizzle-kit generate --name",
     "db:migrate": "tsx --env-file=.env.development database/migrate.ts",
     "db:studio": "dotenv -e .env.development -- drizzle-kit studio",
     "prepare": "husky"
