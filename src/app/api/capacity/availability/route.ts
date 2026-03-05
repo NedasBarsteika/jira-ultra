@@ -1,7 +1,8 @@
-import { sql } from 'kysely';
+import { and, eq, sql } from 'drizzle-orm';
 import { NextRequest, NextResponse } from 'next/server';
 
 import { db } from '@/lib/db';
+import { sprintAvailability, user } from '@/types/schema';
 
 type AvailabilityType = 'full' | 'half' | 'off';
 
@@ -23,14 +24,13 @@ export async function GET(req: NextRequest) {
     }
 
     const rows = await db
-      .selectFrom('sprint_availability')
-      .innerJoin('user', 'user.id', 'sprint_availability.user_id')
-      .select([
-        'sprint_availability.user_id as user_id',
-        'sprint_availability.availability_pattern as pattern',
-      ])
-      .where('sprint_availability.sprint_id', '=', sprintId)
-      .execute();
+      .select({
+        userId: sprintAvailability.userId,
+        pattern: sprintAvailability.availabilityPattern,
+      })
+      .from(sprintAvailability)
+      .innerJoin(user, eq(user.id, sprintAvailability.userId))
+      .where(eq(sprintAvailability.sprintId, sprintId));
 
     return NextResponse.json({ availabilities: rows });
   } catch (error: unknown) {
@@ -88,50 +88,51 @@ export async function POST(req: NextRequest) {
       }
     });
 
-    const existing = await db
-      .selectFrom('sprint_availability')
-      .select('availability_id')
-      .where('sprint_id', '=', sprintId)
-      .where('user_id', '=', userId)
-      .executeTakeFirst();
+    const [existing] = await db
+      .select({ availabilityId: sprintAvailability.availabilityId })
+      .from(sprintAvailability)
+      .where(and(eq(sprintAvailability.sprintId, sprintId), eq(sprintAvailability.userId, userId)))
+      .limit(1);
 
-    let result: { availability_id: string } | undefined;
+    let result: { availabilityId: string } | undefined;
 
     if (existing) {
-      result = await db
-        .updateTable('sprint_availability')
+      const [updated] = await db
+        .update(sprintAvailability)
         .set({
-          availability_pattern: sql`${JSON.stringify(pattern)}::jsonb`,
-          total_hours: totalHours,
-          working_days: workingDays,
-          half_days: halfDays,
-          off_days: offDays,
+          availabilityPattern: sql`${JSON.stringify(pattern)}::jsonb`,
+          totalHours: String(totalHours),
+          workingDays,
+          halfDays,
+          offDays,
           notes: notes ?? null,
         })
-        .where('availability_id', '=', existing.availability_id)
-        .returning('availability_id')
-        .executeTakeFirst();
+        .where(eq(sprintAvailability.availabilityId, existing.availabilityId))
+        .returning({ availabilityId: sprintAvailability.availabilityId });
+
+      result = updated;
     } else {
-      result = await db
-        .insertInto('sprint_availability')
+      const [inserted] = await db
+        .insert(sprintAvailability)
         .values({
-          sprint_id: sprintId,
-          user_id: userId,
-          submitted_by: userId,
-          approved_by: approverId ?? userId,
+          sprintId,
+          userId,
+          submittedBy: userId,
+          approvedBy: approverId ?? userId,
           status: 'approved',
-          availability_pattern: sql`${JSON.stringify(pattern)}::jsonb`,
-          total_hours: totalHours,
-          working_days: workingDays,
-          half_days: halfDays,
-          off_days: offDays,
+          availabilityPattern: sql`${JSON.stringify(pattern)}::jsonb`,
+          totalHours: String(totalHours),
+          workingDays,
+          halfDays,
+          offDays,
           notes: notes ?? null,
         })
-        .returning('availability_id')
-        .executeTakeFirst();
+        .returning({ availabilityId: sprintAvailability.availabilityId });
+
+      result = inserted;
     }
 
-    return NextResponse.json({ id: result?.availability_id }, { status: 201 });
+    return NextResponse.json({ id: result?.availabilityId }, { status: 201 });
   } catch (error: unknown) {
     console.error('Failed to create sprint_availability', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
