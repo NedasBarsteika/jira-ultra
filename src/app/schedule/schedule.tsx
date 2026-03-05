@@ -1,3 +1,5 @@
+'use client';
+
 import { ChevronLeft, ChevronRight, Plus, MapPin, Home, Palmtree } from 'lucide-react';
 import { useState, useEffect } from 'react';
 
