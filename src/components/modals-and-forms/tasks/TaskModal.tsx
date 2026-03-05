@@ -2,7 +2,7 @@
 
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import Chip from '@mui/material/Chip';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import * as yup from 'yup';
 
 import DatePicker from '@/components/utils/date-pickers/DatePicker';
@@ -11,15 +11,11 @@ import { useToast } from '@/components/utils/toast/ToastProvider';
 import { ALL_TAGS } from '@/config/constants';
 import { createTask, deleteTask, updateTask } from '@/server/tasks/tasks';
 import type { TaskRow } from '@/server/tasks/tasks';
+import { getAssigneesForProject } from '@/server/users/users';
 
 // ── Placeholders (replace once auth + project membership are implemented) ──────
 
-// TODO: replace with real project members once user/auth system is built
-const PLACEHOLDER_ASSIGNEES = [{ id: '', name: 'Unassigned' }];
-
-// reporter_id / sprint_id / backlog_id will be null until real auth + project
-// context are wired in.
-// TODO: replace with real authenticated user ID once auth is implemented
+// reporter_id / sprint_id / backlog_id will be null until real auth + project context are wired in.
 const PLACEHOLDER_REPORTER_ID = 'c0000000-0000-0000-0000-000000000001';
 const PLACEHOLDER_SPRINT_ID = null;
 const PLACEHOLDER_BACKLOG_ID = null;
@@ -31,7 +27,7 @@ interface TaskModalProps {
   onClose: () => void;
   /** Provide to switch to update mode and pre-fill the form. */
   task?: TaskRow;
-  /** Required when creating (no task provided). */
+  /** Required when creating (no task provided). If not provided in update mode, will use task.projectId */
   projectId?: string;
   onSuccess?: () => void;
 }
@@ -50,6 +46,8 @@ interface FormState {
   estimated_hours: string;
 }
 
+type AssigneeOption = { id: string; name: string };
+
 const emptyForm: FormState = {
   title: '',
   description: '',
@@ -67,12 +65,12 @@ function taskToForm(task: TaskRow): FormState {
     title: task?.title,
     description: task?.description ?? '',
     priority: task?.priority ?? 'medium',
-    task_type: task?.task_type ?? 'task',
-    story_points: task?.story_points?.toString() ?? '',
+    task_type: task?.taskType ?? 'task',
+    story_points: task?.storyPoints?.toString() ?? '',
     tags: task?.tags ?? [],
-    due_date: task?.due_date ? new Date(task?.due_date as unknown as string) : null,
-    assignee_id: task?.assignee_id ?? '',
-    estimated_hours: task?.estimated_hours?.toString() ?? '',
+    due_date: task?.dueDate ? new Date(task?.dueDate as unknown as string) : null,
+    assignee_id: task?.assigneeId ?? '',
+    estimated_hours: task?.estimatedHours?.toString() ?? '',
   };
 }
 
@@ -130,19 +128,78 @@ export default function TaskModal({ open, onClose, task, projectId, onSuccess }:
   const toast = useToast();
   const isUpdate = !!task;
 
+  const resolvedProjectId = useMemo(() => {
+    return projectId ?? task?.projectId ?? undefined;
+  }, [projectId, task?.projectId]);
+
   const [form, setForm] = useState<FormState>(task ? taskToForm(task) : emptyForm);
   const [errors, setErrors] = useState<FieldErrors>({});
   const [loading, setLoading] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [confirmingDelete, setConfirmingDelete] = useState(false);
 
+  const [assignees, setAssignees] = useState<AssigneeOption[]>([{ id: '', name: 'Unassigned' }]);
+  const [assigneesLoading, setAssigneesLoading] = useState(false);
+
+  // ✅ Ref tam, kad useEffect nereikėtų priklausyti nuo form.assignee_id (ir neliktų eslint warning)
+  const assigneeIdRef = useRef<string>('');
+
   useEffect(() => {
-    setForm(task ? taskToForm(task) : emptyForm);
+    const nextForm = task ? taskToForm(task) : emptyForm;
+    setForm(nextForm);
+    assigneeIdRef.current = nextForm.assignee_id ?? '';
     setErrors({});
     setConfirmingDelete(false);
   }, [task, open]);
 
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadAssignees() {
+      if (!open) return;
+
+      // reset kiekvieną kartą atidarius
+      setAssigneesLoading(true);
+
+      if (!resolvedProjectId) {
+        setAssignees([{ id: '', name: 'Unassigned' }]);
+        setAssigneesLoading(false);
+        return;
+      }
+
+      try {
+        const list = await getAssigneesForProject(resolvedProjectId);
+        if (cancelled) return;
+
+        const withUnassigned: AssigneeOption[] = [{ id: '', name: 'Unassigned' }, ...(list ?? [])];
+        setAssignees(withUnassigned);
+
+        // jei dabartinis assignee_id neegzistuoja sąraše — permetam į Unassigned
+        const current = assigneeIdRef.current ?? '';
+        if (current && !withUnassigned.some(a => a.id === current)) {
+          assigneeIdRef.current = '';
+          setForm(prev => ({ ...prev, assignee_id: '' }));
+        }
+      } catch (e) {
+        console.error(e);
+        if (!cancelled) {
+          setAssignees([{ id: '', name: 'Unassigned' }]);
+        }
+      } finally {
+        if (!cancelled) setAssigneesLoading(false);
+      }
+    }
+
+    void loadAssignees();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [open, resolvedProjectId]);
+
   function update(field: keyof Omit<FormState, 'tags' | 'due_date'>, value: string) {
+    if (field === 'assignee_id') assigneeIdRef.current = value;
+
     setForm(prev => ({ ...prev, [field]: value }));
     if (errors[field]) {
       setErrors(prev => {
@@ -169,39 +226,41 @@ export default function TaskModal({ open, onClose, task, projectId, onSuccess }:
       setLoading(true);
 
       try {
-        const editableFields = {
+        const editableFields: Partial<TaskRow> = {
           title: validated?.title,
           description: validated?.description?.trim() || null,
           priority: validated?.priority,
-          task_type: validated?.task_type,
-          story_points: validated?.story_points ? parseInt(validated?.story_points, 10) : null,
+          taskType: validated?.task_type,
+          storyPoints: validated?.story_points ? parseInt(validated?.story_points, 10) : null,
           tags: (form?.tags?.length ?? 0) > 0 ? form?.tags : null,
-          due_date: form?.due_date ?? null,
-          assignee_id: form?.assignee_id || null,
-          estimated_hours: validated?.estimated_hours
-            ? parseFloat(validated?.estimated_hours)
+          dueDate: form?.due_date?.toISOString().split('T')[0] ?? null,
+          assigneeId: form?.assignee_id || null,
+          estimatedHours: validated?.estimated_hours
+            ? parseFloat(validated?.estimated_hours).toString()
             : null,
         };
 
         if (isUpdate) {
-          await updateTask(task?.task_id, editableFields);
+          await updateTask(task?.taskId, editableFields);
           toast.success('Task updated successfully');
         } else {
-          if (!projectId) {
+          if (!resolvedProjectId) {
             toast.error('Project ID is required to create a task.');
             return;
           }
           await createTask({
-            project_id: projectId,
+            projectId: resolvedProjectId,
             ...editableFields,
-            reporter_id: PLACEHOLDER_REPORTER_ID,
-            sprint_id: PLACEHOLDER_SPRINT_ID,
-            backlog_id: PLACEHOLDER_BACKLOG_ID,
+            title: validated?.title,
+            reporterId: PLACEHOLDER_REPORTER_ID,
+            sprintId: PLACEHOLDER_SPRINT_ID,
+            backlogId: PLACEHOLDER_BACKLOG_ID,
           });
           toast.success('Task created successfully');
         }
 
         setForm(emptyForm);
+        assigneeIdRef.current = '';
         onSuccess?.();
         onClose();
       } catch {
@@ -227,10 +286,10 @@ export default function TaskModal({ open, onClose, task, projectId, onSuccess }:
   }
 
   async function handleDelete() {
-    if (!task?.task_id) return;
+    if (!task || !task?.taskId) return;
     setDeleting(true);
     try {
-      await deleteTask(task?.task_id);
+      await deleteTask(task?.taskId);
       toast.success('Task deleted');
       onSuccess?.();
       onClose();
@@ -242,7 +301,9 @@ export default function TaskModal({ open, onClose, task, projectId, onSuccess }:
   }
 
   function handleClose() {
-    setForm(task ? taskToForm(task) : emptyForm);
+    const nextForm = task ? taskToForm(task) : emptyForm;
+    setForm(nextForm);
+    assigneeIdRef.current = nextForm.assignee_id ?? '';
     setErrors({});
     setConfirmingDelete(false);
     onClose();
@@ -367,17 +428,21 @@ export default function TaskModal({ open, onClose, task, projectId, onSuccess }:
           </div>
         </div>
 
-        {/* Assignee + Reporter (placeholder) */}
+        {/* Assignee + Due date */}
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className={labelClasses}>Assignee</label>
+            <label className={labelClasses}>
+              Assignee{' '}
+              {assigneesLoading ? <span className="text-xs opacity-70">(loading…)</span> : null}
+            </label>
             <select
               className={`${inputClasses} cursor-pointer`}
               value={form.assignee_id}
               onChange={e => update('assignee_id', e.target.value)}
+              disabled={assigneesLoading}
             >
-              {PLACEHOLDER_ASSIGNEES.map(u => (
-                <option key={u.id} value={u.id}>
+              {assignees.map(u => (
+                <option key={u.id || 'unassigned'} value={u.id}>
                   {u.name}
                 </option>
               ))}

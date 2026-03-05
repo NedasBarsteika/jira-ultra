@@ -50,7 +50,9 @@ function formatDueDate(date: Date | string): string {
   const now = new Date();
   const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
   const startOfDueDate = new Date(d.getFullYear(), d.getMonth(), d.getDate());
-  const diff = Math.round((startOfDueDate.getTime() - startOfToday.getTime()) / (1000 * 60 * 60 * 24));
+  const diff = Math.round(
+    (startOfDueDate.getTime() - startOfToday.getTime()) / (1000 * 60 * 60 * 24)
+  );
 
   if (diff < 0) return 'Overdue';
   if (diff === 0) return 'Today';
@@ -63,8 +65,10 @@ function dueDateTone(date: Date | string): { color: string; bg: string } {
   const now = new Date();
   const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
   const startOfDueDate = new Date(d.getFullYear(), d.getMonth(), d.getDate());
-  const diffDays = Math.round((startOfDueDate.getTime() - startOfToday.getTime()) / (1000 * 60 * 60 * 24));
-  
+  const diffDays = Math.round(
+    (startOfDueDate.getTime() - startOfToday.getTime()) / (1000 * 60 * 60 * 24)
+  );
+
   if (diffDays < 0) return { color: '#fca5a5', bg: 'rgba(248,113,113,0.12)' };
   if (diffDays <= 2) return { color: '#fcd34d', bg: 'rgba(251,191,36,0.12)' };
   return { color: 'rgba(255,255,255,0.70)', bg: 'rgba(255,255,255,0.08)' };
@@ -77,15 +81,18 @@ interface TaskCardProps {
 
 export default function TaskCard({ task, onClick }: TaskCardProps) {
   const priority = (task?.priority ?? 'medium') as Priority;
-  const { icon: PriorityIcon, label: priorityLabel, color: priorityColor } =
-    priorityConfig[priority] ?? priorityConfig.medium;
+  const {
+    icon: PriorityIcon,
+    label: priorityLabel,
+    color: priorityColor,
+  } = priorityConfig[priority] ?? priorityConfig.medium;
 
   const tags = task?.tags ?? [];
 
-  const due = task?.due_date;
+  const due = task?.dueDate;
   const dueStyle = due ? dueDateTone(due) : null;
 
-  const rawKey = (task?.task_key ?? '-') as string;
+  const rawKey = task?.taskKey ?? '-';
   const cleanKey = rawKey.replace(/^[\s⋮⠿]+/g, ''); // Remove leading decorative characters
 
   const handleCardKeyDown = (e: React.KeyboardEvent) => {
@@ -142,7 +149,7 @@ export default function TaskCard({ task, onClick }: TaskCardProps) {
             const style = tagStyles[tag] ?? fallbackTag;
             return (
               <Chip
-                key={`${task.task_id}-${tag}-${idx}`}
+                key={`${task.taskId}-${tag}-${idx}`}
                 label={tag}
                 size="small"
                 sx={{
@@ -166,13 +173,13 @@ export default function TaskCard({ task, onClick }: TaskCardProps) {
 
       <div className="flex items-center justify-between mt-3">
         <div className="flex items-center gap-2">
-          <Tooltip title={task?.assignee_id ? 'Assigned' : 'Unassigned'} placement="bottom" arrow>
+          <Tooltip title={task?.assigneeId ? 'Assigned' : 'Unassigned'} placement="bottom" arrow>
             <Avatar
               sx={{
                 width: 22,
                 height: 22,
-                bgcolor: task?.assignee_id ? 'rgba(167,139,250,0.9)' : 'rgba(255,255,255,0.18)',
-                color: task?.assignee_id ? '#111827' : 'rgba(255,255,255,0.75)',
+                bgcolor: task?.assigneeId ? 'rgba(167,139,250,0.9)' : 'rgba(255,255,255,0.18)',
+                color: task?.assigneeId ? '#111827' : 'rgba(255,255,255,0.75)',
                 fontSize: 10,
               }}
             >
@@ -180,20 +187,20 @@ export default function TaskCard({ task, onClick }: TaskCardProps) {
             </Avatar>
           </Tooltip>
 
-          {task?.story_points != null && (
+          {task?.storyPoints != null && (
             <span className="text-[10px] rounded-md bg-white/[.08] text-white/70 px-2 py-0.5">
-              {task.story_points} SP
+              {task.storyPoints} SP
             </span>
           )}
         </div>
 
-        {dueStyle && (
+        {due && dueStyle && (
           <div
             className="flex items-center gap-1 text-[11px] rounded-md px-2 py-0.5"
             style={{ color: dueStyle.color, background: dueStyle.bg }}
           >
             <CalendarTodayIcon sx={{ fontSize: 12 }} />
-            <span>{formatDueDate(due!)}</span>
+            <span>{formatDueDate(due)}</span>
           </div>
         )}
       </div>
