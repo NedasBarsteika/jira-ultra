@@ -2,6 +2,7 @@ import Link from 'next/link';
 
 import FigmaCheckboxShowcase from '@/app/examples/components/FigmaCheckboxShowcase';
 import InputShowcase from '@/app/examples/components/InputShowcase';
+import LogoShowcase from '@/app/examples/components/LogoShowcase';
 
 import AutocompleteShowcase from './components/AutocompleteShowcase';
 import AvatarBadgeChipShowcase from './components/AvatarBadgeChipShowcase';
@@ -43,6 +44,9 @@ export default function ExamplesPage() {
 
         <Section title="Modal" />
         <ModalShowcase />
+
+        <Section title="Logo" />
+        <LogoShowcase />
 
         <Section title="Image" />
         <ImageShowcase />

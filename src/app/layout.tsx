@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
 
 import './globals.css';
+import Footer from '@/components/layout/footer/Footer';
 import Navbar from '@/components/layout/navbar/Navbar';
 import MuiProvider from '@/components/providers/MuiProvider';
 import ToastProvider from '@/components/utils/toast/ToastProvider';
@@ -66,6 +67,7 @@ export default function RootLayout({
           <ToastProvider>
             <Navbar />
             {children}
+            <Footer />
           </ToastProvider>
         </MuiProvider>
       </body>
